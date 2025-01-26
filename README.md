@@ -7,8 +7,8 @@ This is a MeshCom-Client, that is written in Python for simple usage on a compat
 ## How to start
 * Install python3 and fullfill requirements by installing all missing libraries.
 * Connect your MeshCom-Node to your serial terminal and issue the following commands, to start the node to transfer data via udp to your computer:
-** --extudpip <ip of your computer>
-** --extudp on
+  - --extudpip <ip of your computer>
+  - --extudp on
 * Go to Settings and put in the new destination ip address = ip of your node.
 
 Now it should be running!
