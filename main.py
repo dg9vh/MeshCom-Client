@@ -29,7 +29,7 @@ config = configparser.ConfigParser()
 # Dictionary zur Verwaltung der Tabs
 tab_frames = {}
 tab_highlighted = set()  # Set für Tabs, die hervorgehoben werden sollen
-volume = 50  # Standardlautstärke (50%)
+volume = 0.5  # Standardlautstärke (50%)
 
 # Ziel-IP aus Einstellungen laden oder Standardwert setzen
 DESTINATION_IP = "192.168.178.28"
@@ -75,7 +75,7 @@ def load_settings():
     if os.path.exists(CONFIG_FILE):
         config.read(CONFIG_FILE)
         DESTINATION_IP = config.get("Settings", "DestinationIP", fallback=DESTINATION_IP)
-        volume = config.getint("Settings", "Volume", fallback=50)
+        volume = config.getfloat("Settings", "Volume", fallback=0.5)
 
 
 def save_settings():
@@ -92,6 +92,7 @@ def open_settings_dialog():
     def save_volume(new_volume):
         global volume
         volume = new_volume
+        save_settings()
         print(f"Lautstärke gespeichert: {volume}")
 
     SettingsDialog(root, volume, save_volume)
