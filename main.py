@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import os
 import configparser
 from datetime import datetime
