@@ -157,6 +157,14 @@ def display_message(message):
     if msg_text == '':
         return
 
+
+    if "{CET}"in msg_text:
+        net_time.config(state="normal")
+        net_time.delete(0, tk.END)
+        net_time.insert(0, msg_text[5:])
+        net_time.config(state="disabled")
+        return
+    
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 
@@ -321,10 +329,15 @@ message_entry.grid(row=0, column=1, padx=5, pady=5)
 tk.Label(input_frame, text="Ziel:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
 dst_entry = tk.Entry(input_frame, width=20)
 dst_entry.insert(0, DEFAULT_DST)
-dst_entry.grid(row=1, column=1, padx=5, pady=5)
+dst_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 
 send_button = tk.Button(input_frame, text="Senden", command=send_message)
 send_button.grid(row=0, column=2, rowspan=2, padx=5, pady=5, sticky="ns")
+
+tk.Label(input_frame, text="Letzter Uhrzeit vom Netz:").grid(row=0, column=3, padx=5, pady=5, sticky="w")
+net_time = tk.Entry(input_frame, width=25)
+net_time.grid(row=1, column=3, padx=5, pady=5)
+net_time.config(state="disabled")
 
 tab_control.pack(expand=1, fill="both", padx=10, pady=10)
 
