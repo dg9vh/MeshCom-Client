@@ -35,6 +35,9 @@ volume = 0.5  # Standardlautstärke (50%)
 # Ziel-IP aus Einstellungen laden oder Standardwert setzen
 DESTINATION_IP = "192.168.178.28"
 
+# Eigenes Rufzeichen aus Einstellungen laden oder Standardwert setzen
+MYCALL = "DG9VH-99"
+
 
 class SettingsDialog(tk.Toplevel):
     def __init__(self, master, initial_volume, save_callback):
@@ -72,10 +75,11 @@ class SettingsDialog(tk.Toplevel):
 
 def load_settings():
     """Lädt Einstellungen aus der INI-Datei."""
-    global DESTINATION_IP, volume
+    global DESTINATION_IP, MYCALL, volume
     if os.path.exists(CONFIG_FILE):
         config.read(CONFIG_FILE)
         DESTINATION_IP = config.get("Settings", "DestinationIP", fallback=DESTINATION_IP)
+        MYCALL = config.get("Settings", "MyCall", fallback=MYCALL)
         volume = config.getfloat("Settings", "Volume", fallback=0.5)
 
 
@@ -83,6 +87,7 @@ def save_settings():
     """Speichert Einstellungen in die INI-Datei."""
     config["Settings"] = {
         "DestinationIP": DESTINATION_IP,
+        "MYCALL": MYCALL,
         "Volume": volume,
     }
     with open(CONFIG_FILE, "w") as configfile:
@@ -147,8 +152,13 @@ def receive_messages():
 def display_message(message):
     src_call = message.get('src', 'Unknown')
     dst_call = message.get('dst', 'Unknown')
+    if dst_call == MYCALL:
+        dst_call = src_call
     msg_text = message.get('msg', '')
     message_id = message.get("msg_id", '')
+    
+    if message_id == '':
+        return
     
     if message_id in received_ids:
         print(f"Nachricht mit ID {message_id} bereits empfangen und verarbeitet.")
@@ -279,6 +289,16 @@ def configure_destination_ip():
         messagebox.showinfo("Einstellung gespeichert", f"Neue Ziel-IP: {DESTINATION_IP}")
 
 
+def configure_mycall():
+    """Dialog zur Konfiguration des eigenen Rufzeichens."""
+    global MYCALL
+    new_mycall = simpledialog.askstring("Eigenes Rufzeichen konfigurieren", "Geben Sie das eigene Rufzeichen mit SSID ein:", initialvalue=MYCALL)
+    if new_mycall:
+        MYCALL = new_mycall
+        save_settings()
+        messagebox.showinfo("Einstellung gespeichert", f"Neues Rufzeichen: {MYCALL}")
+
+
 def show_help():
     """Hilfe anzeigen."""
     messagebox.showinfo("Hilfe", "Dieses Programm ermöglicht den Empfang und das Senden von Nachrichten über das Meshcom-Netzwerk, indem via UDP eine Verbindung zum Node hergestellt wird. Zur Nutzung mit dem Node ist hier vorher auf dem Node mit --extudpip <ip-adresse des Rechners> sowie --extudp on die Datenübertragung zu aktivieren und über die Einstellungen hier die IP-Adresse des Nodes anzugeben.")
@@ -306,6 +326,7 @@ menu_bar.add_cascade(label="Datei", menu=file_menu)
 
 settings_menu = tk.Menu(menu_bar, tearoff=0)
 settings_menu.add_command(label="Ziel-IP konfigurieren", command=configure_destination_ip)
+settings_menu.add_command(label="Eigenes Rufzeichen", command=configure_mycall)
 settings_menu.add_command(label="Lautstärke konfigurieren", command=open_settings_dialog)
 menu_bar.add_cascade(label="Einstellungen", menu=settings_menu)
 
