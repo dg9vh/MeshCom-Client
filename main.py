@@ -13,7 +13,7 @@ import numpy as np
 import collections
 
 # Wir speichern die letzten 20 IDs in einer deque
-received_ids = collections.deque(maxlen=20)  # maxlen sorgt dafür, dass nur die letzten 20 IDs gespeichert werden
+received_ids = collections.deque(maxlen=5)  # maxlen sorgt dafür, dass nur die letzten 5 IDs gespeichert werden
 
 # Server-Konfiguration
 UDP_IP_ADDRESS = "0.0.0.0"
@@ -21,7 +21,7 @@ UDP_PORT_NO = 1799
 
 DEFAULT_DST = "*"  # Standardziel für Nachrichten (Broadcast)
 DESTINATION_PORT = 1799  # Ziel-Port anpassen
-MAX_MESSAGE_LENGTH = 180  # Maximale Länge der Nachricht
+MAX_MESSAGE_LENGTH = 155  # Maximale Länge der Nachricht
 
 # Einstellungen
 CONFIG_FILE = "settings.ini"
@@ -154,6 +154,10 @@ def display_message(message):
     dst_call = message.get('dst', 'Unknown')
     if dst_call == MYCALL:
         dst_call = src_call
+    
+    if dst_call.find(',') > 0:
+        dst_call = dst_call[:dst_call.find(',')]
+        
     msg_text = message.get('msg', '')
     message_id = message.get("msg_id", '')
     
@@ -167,7 +171,6 @@ def display_message(message):
     if msg_text == '':
         return
 
-
     if "{CET}"in msg_text:
         net_time.config(state="normal")
         net_time.delete(0, tk.END)
@@ -177,10 +180,9 @@ def display_message(message):
     
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-
-    
     if dst_call not in tab_frames:
         create_tab(dst_call)
+        print(str(tab_frames))
 
     display_text = f"{timestamp} - {src_call}: {msg_text}\n"
     tab_frames[dst_call].config(state=tk.NORMAL)
