@@ -182,7 +182,6 @@ def display_message(message):
 
     if dst_call not in tab_frames:
         create_tab(dst_call)
-        print(str(tab_frames))
 
     display_text = f"{timestamp} - {src_call}: {msg_text}\n"
     tab_frames[dst_call].config(state=tk.NORMAL)
