@@ -21,7 +21,7 @@ UDP_PORT_NO = 1799
 
 DEFAULT_DST = "*"  # Standardziel für Nachrichten (Broadcast)
 DESTINATION_PORT = 1799  # Ziel-Port anpassen
-MAX_MESSAGE_LENGTH = 155  # Maximale Länge der Nachricht
+MAX_MESSAGE_LENGTH = 150  # Maximale Länge der Nachricht
 
 # Einstellungen
 CONFIG_FILE = "settings.ini"
