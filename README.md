@@ -16,6 +16,10 @@ This is a MeshCom-Client, that is written in Python for simple usage on a compat
 
 Now it should be running!
 
+## Troubles?
+
+If you have issues with emojis under linux, you could try `sudo apt-get install fonts-noto*` to install needed fonts
+
 ## ToDos
 
 * View counter of new messages in tab
