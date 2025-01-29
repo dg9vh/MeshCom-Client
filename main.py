@@ -197,7 +197,7 @@ def display_message(message):
     received_ids.append(message_id)
 
 
-def send_message():
+def send_message(event=None):
     msg_text = message_entry.get()
     msg_text = msg_text.replace('"',"'")
     
@@ -347,6 +347,7 @@ tk.Label(input_frame, text="Nachricht:").grid(row=0, column=0, padx=5, pady=5, s
 vcmd = root.register(validate_length)  # Validation-Command registrieren
 message_entry = tk.Entry(input_frame, width=40, validate="key", validatecommand=(vcmd, "%P"))
 message_entry.grid(row=0, column=1, padx=5, pady=5)
+message_entry.bind("<Return>", send_message) 
 
 tk.Label(input_frame, text="Ziel:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
 dst_entry = tk.Entry(input_frame, width=20)
