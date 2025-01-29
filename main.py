@@ -312,7 +312,7 @@ def show_about():
 
 # GUI-Setup
 root = tk.Tk()
-root.title("MeshCom Client")
+root.title("MeshCom Client by DG9VH")
 root.geometry("800x400")  # Fenstergröße auf 800x400 setzen
 
 load_settings()
