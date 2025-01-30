@@ -19,8 +19,9 @@ Now it should be running!
 ## Key features
 
 * Grouping messages into tabs by destination (GRC or callsign)
-* alerting sound for new message
-* watchlist and alerting sound for callsigns in watchlist
+* Alerting sound for new message
+* Watchlist and alerting sound for callsigns in watchlist
+* Restoring of chat-history on reopening chat-tabs
 
 ## Troubles?
 
