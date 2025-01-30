@@ -74,6 +74,7 @@ class SettingsDialog(tk.Toplevel):
         # Speichern-Button
         ttk.Button(self, text="Speichern", command=self.save_settings).pack(pady=10)
 
+
     def save_settings(self):
         # Lautstärke speichern und zurückgeben
         volume = self.volume_slider.get()
@@ -112,7 +113,6 @@ class WatchlistDialog(tk.Toplevel):
 
     def save_watchlist(self):
         """Speichert die aktuelle Watchlist in die Settings"""
-
         save_settings();
         
         
@@ -126,6 +126,7 @@ class WatchlistDialog(tk.Toplevel):
             self.save_watchlist()
         elif callsign in watchlist:
             messagebox.showwarning("Warnung", f"{callsign} ist bereits in der Watchlist.")
+
 
     def remove_callsign(self):
         """Löscht das ausgewählte Rufzeichen aus der Watchlist."""
@@ -176,6 +177,7 @@ def open_settings_dialog():
 
     SettingsDialog(root, volume, save_volume)
 
+
 def open_watchlist_dialog():
     def save_watchlist(new_watchlist):
         global watchlist
@@ -191,6 +193,7 @@ def save_chatlog(chat_data):
         print("Speichere Chatverlauf")
         json.dump(chat_data, f, indent=4)
         print("Speichern beendet")
+
 
 def load_chatlog():
     if os.path.exists(CHATLOG_FILE):
@@ -286,8 +289,6 @@ def display_message(message):
     
     add_message(dst_call, display_text)
     
-    
-    
     callsign = extract_callsign(src_call)
     if callsign in watchlist:
         print(f"ALERT: {callsign} erkannt!")
@@ -305,7 +306,6 @@ def add_message(call, message):
     if call not in chat_storage:
         chat_storage[call] = []
     chat_storage[call].append(message)
-    print(chat_storage)
     save_chatlog(chat_storage)  # Speichert die Chats direkt
 
 
@@ -372,6 +372,7 @@ def create_tab(dst_call):
             tab_frames[dst_call].insert(tk.END, msg) # Chatverlauf in das Text-Widget einfügen
             tab_frames[dst_call].config(state=tk.DISABLED)
             tab_frames[dst_call].yview(tk.END)
+
 
 def close_tab(dst_call, tab_frame):
     global chat_storage
