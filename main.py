@@ -322,6 +322,7 @@ def create_tab(dst_call):
     tab_header.pack(side=tk.TOP, fill="x")
 
     title_label = tk.Label(tab_header, text=f"Ziel: {dst_call}", anchor="w")
+    title_label.bind("<Button-1>", reset_tab_highlight)
     title_label.pack(side=tk.LEFT, padx=5)
 
     close_button = tk.Button(tab_header, text="X", command=lambda: close_tab(dst_call, tab_frame), width=2)
