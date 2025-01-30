@@ -366,8 +366,8 @@ def create_tab(dst_call):
     
     tab_frames[dst_call] = text_area
     if dst_call in chat_storage:
+        print("Chat-Historie wiederherstellen")
         for msg in chat_storage[dst_call]:
-            print("Chat-Historie wiederherstellen")
             tab_frames[dst_call].config(state=tk.NORMAL)
             tab_frames[dst_call].insert(tk.END, msg) # Chatverlauf in das Text-Widget einfügen
             tab_frames[dst_call].config(state=tk.DISABLED)
