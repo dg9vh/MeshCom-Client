@@ -28,6 +28,9 @@ current_dir = os.getcwd()
 CONFIG_FILE = current_dir + "/settings.ini"
 config = configparser.ConfigParser()
 
+# Chatlog
+CHATLOG_FILE = current_dir + "/chatlog.json"
+
 # Dictionary zur Verwaltung der Tabs
 tab_frames = {}
 tab_highlighted = set()  # Set für Tabs, die hervorgehoben werden sollen
@@ -88,7 +91,7 @@ class WatchlistDialog(tk.Toplevel):
 
         self.save_callback = save_callback
 
-        tk.Label(self, text="Rufzeichen hinzufügen:").grid(row=0, column=0, sticky="w")
+        tk.Label(self, text="Rufzeichen hinzufügen (ohne -SSID):").grid(row=0, column=0, sticky="w")
 
         self.entry_callsign = tk.Entry(self)
         self.entry_callsign.grid(row=0, column=1, padx=5)
@@ -183,6 +186,19 @@ def open_watchlist_dialog():
     WatchlistDialog(root, watchlist, save_watchlist)
     
 
+def save_chatlog(chat_data):
+    with open(CHATLOG_FILE, "w") as f:
+        print("Speichere Chatverlauf")
+        json.dump(chat_data, f, indent=4)
+        print("Speichern beendet")
+
+def load_chatlog():
+    if os.path.exists(CHATLOG_FILE):
+        with open(CHATLOG_FILE, "r") as f:
+            return json.load(f)
+    return {}
+
+
 def play_sound_with_volume(file_path, volume=1.0):
     """
     Spielt eine Sounddatei mit einstellbarer Lautstärke ab.
@@ -268,6 +284,10 @@ def display_message(message):
     tab_frames[dst_call].config(state=tk.DISABLED)
     tab_frames[dst_call].yview(tk.END)
     
+    add_message(dst_call, display_text)
+    
+    
+    
     callsign = extract_callsign(src_call)
     if callsign in watchlist:
         print(f"ALERT: {callsign} erkannt!")
@@ -279,6 +299,14 @@ def display_message(message):
     highlight_tab(dst_call)
     # Nach der Verarbeitung die ID zur deque hinzufügen
     received_ids.append(message_id)
+
+
+def add_message(call, message):
+    if call not in chat_storage:
+        chat_storage[call] = []
+    chat_storage[call].append(message)
+    print(chat_storage)
+    save_chatlog(chat_storage)  # Speichert die Chats direkt
 
 
 def send_message(event=None):
@@ -335,11 +363,19 @@ def create_tab(dst_call):
     scrollbar = tk.Scrollbar(tab_frame, orient=tk.VERTICAL, command=text_area.yview)
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
     text_area.config(yscrollcommand=scrollbar.set)
-
+    
     tab_frames[dst_call] = text_area
-
+    if dst_call in chat_storage:
+        for msg in chat_storage[dst_call]:
+            print("Chat-Historie wiederherstellen")
+            tab_frames[dst_call].config(state=tk.NORMAL)
+            tab_frames[dst_call].insert(tk.END, msg) # Chatverlauf in das Text-Widget einfügen
+            tab_frames[dst_call].config(state=tk.DISABLED)
+            tab_frames[dst_call].yview(tk.END)
 
 def close_tab(dst_call, tab_frame):
+    global chat_storage
+    save_chatlog(chat_storage) 
     if dst_call in tab_frames:
         del tab_frames[dst_call]
     tab_control.forget(tab_frame)
@@ -400,12 +436,20 @@ def show_about():
     messagebox.showinfo("Über", "MeshCom Client\nVersion 1.0\nEntwickelt von DG9VH")
 
 
+def on_closing():
+    save_chatlog(chat_storage)  # Speichert alle offenen Chats
+    root.destroy()  # Schließt das Tkinter-Fenster
+
+
 # GUI-Setup
 root = tk.Tk()
 root.title("MeshCom Client by DG9VH")
 root.geometry("800x400")  # Fenstergröße auf 800x400 setzen
+root.protocol("WM_DELETE_WINDOW", on_closing)  # Fängt das Schließen ab
 
 load_settings()
+
+chat_storage = load_chatlog()  # Lädt vorhandene Chatlogs beim Programmstart
 
 # Menüleiste
 menu_bar = tk.Menu(root)
