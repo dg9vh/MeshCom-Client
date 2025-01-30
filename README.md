@@ -27,3 +27,5 @@ If you have issues with emojis under linux, you could try `sudo apt-get install 
 
 ## Contributions
 Sound Effect by <a href="https://pixabay.com/de/users/freesound_community-46691455/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=40821">freesound_community</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=40821">Pixabay</a>
+
+Sound Effect by <a href="https://pixabay.com/de/users/rescopicsound-45188866/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=230478">Rescopic Sound</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=230478">Pixabay</a>

@@ -30,6 +30,10 @@ config = configparser.ConfigParser()
 # Dictionary zur Verwaltung der Tabs
 tab_frames = {}
 tab_highlighted = set()  # Set für Tabs, die hervorgehoben werden sollen
+
+#Set für Watchlist
+watchlist = set()
+
 volume = 0.5  # Standardlautstärke (50%)
 
 # Ziel-IP aus Einstellungen laden oder Standardwert setzen
@@ -71,16 +75,79 @@ class SettingsDialog(tk.Toplevel):
         volume = self.volume_slider.get()
         self.save_callback(volume)
         self.destroy()
+        
+
+class WatchlistDialog(tk.Toplevel):
+    global watchlist
+    def __init__(self, master, initial_volume, save_callback):
+        super().__init__(master)
+        self.title("Einstellungen")
+        self.geometry("500x400")
+        self.resizable(False, False)
+
+        self.save_callback = save_callback
+
+        tk.Label(self, text="Rufzeichen hinzufügen:").grid(row=0, column=0, sticky="w")
+
+        self.entry_callsign = tk.Entry(self)
+        self.entry_callsign.grid(row=0, column=1, padx=5)
+
+        self.btn_add = tk.Button(self, text="Hinzufügen", command=self.add_callsign)
+        self.btn_add.grid(row=0, column=2, padx=5)
+
+        self.listbox = tk.Listbox(self, height=10, width=30)
+        self.listbox.grid(row=1, column=0, columnspan=2, pady=5)
+
+        self.btn_remove = tk.Button(self, text="Löschen", command=self.remove_callsign)
+        self.btn_remove.grid(row=1, column=2, padx=5)
+
+        # Watchlist laden
+        for call in watchlist:
+            self.listbox.insert(tk.END, call)
+
+
+    def save_watchlist(self):
+        """Speichert die aktuelle Watchlist in die Settings"""
+
+        save_settings();
+        
+        
+    def add_callsign(self):
+        """Fügt ein neues Rufzeichen zur Watchlist hinzu."""
+        callsign = self.entry_callsign.get().strip().upper()
+        if callsign and callsign not in watchlist:
+            watchlist.add(callsign)
+            self.listbox.insert(tk.END, callsign)
+            self.entry_callsign.delete(0, tk.END)
+            self.save_watchlist()
+        elif callsign in watchlist:
+            messagebox.showwarning("Warnung", f"{callsign} ist bereits in der Watchlist.")
+
+    def remove_callsign(self):
+        """Löscht das ausgewählte Rufzeichen aus der Watchlist."""
+        selected = self.listbox.curselection()
+        if selected:
+            callsign = self.listbox.get(selected[0])
+            watchlist.remove(callsign)
+            self.listbox.delete(selected[0])
+            self.save_watchlist()
+            
+        
+    def save_settings(self):
+        # Watchlist speichern und zurückgeben
+        self.save_callback(watchlist)
+        self.destroy()
 
 
 def load_settings():
     """Lädt Einstellungen aus der INI-Datei."""
-    global DESTINATION_IP, MYCALL, volume
+    global DESTINATION_IP, MYCALL, volume, watchlist
     if os.path.exists(CONFIG_FILE):
         config.read(CONFIG_FILE)
         DESTINATION_IP = config.get("Settings", "DestinationIP", fallback=DESTINATION_IP)
         MYCALL = config.get("Settings", "MyCall", fallback=MYCALL)
         volume = config.getfloat("Settings", "Volume", fallback=0.5)
+        watchlist = set(config.get("watchlist", "callsigns", fallback="").split(","))
 
 
 def save_settings():
@@ -90,6 +157,8 @@ def save_settings():
         "MYCALL": MYCALL,
         "Volume": volume,
     }
+    config["watchlist"] = {"callsigns": ",".join(watchlist)}
+    
     with open(CONFIG_FILE, "w") as configfile:
         config.write(configfile)
 
@@ -102,6 +171,15 @@ def open_settings_dialog():
         print(f"Lautstärke gespeichert: {volume}")
 
     SettingsDialog(root, volume, save_volume)
+
+def open_watchlist_dialog():
+    def save_watchlist(new_watchlist):
+        global watchlist
+        watchlist = new_watchlist
+        save_settings()
+        print(f"Watchlist gespeichert")
+
+    WatchlistDialog(root, watchlist, save_watchlist)
     
 
 def play_sound_with_volume(file_path, volume=1.0):
@@ -188,7 +266,12 @@ def display_message(message):
     tab_frames[dst_call].insert(tk.END, display_text)
     tab_frames[dst_call].config(state=tk.DISABLED)
     tab_frames[dst_call].yview(tk.END)
-    if src_call != "You":
+    
+    callsign = extract_callsign(src_call)
+    if callsign in watchlist:
+        print(f"ALERT: {callsign} erkannt!")
+        play_sound_with_volume("alert.wav", volume)
+    elif src_call != "You":
         play_sound_with_volume("klingel.wav", volume)
 
     # Tab hervorheben
@@ -300,6 +383,11 @@ def configure_mycall():
         messagebox.showinfo("Einstellung gespeichert", f"Neues Rufzeichen: {MYCALL}")
 
 
+def extract_callsign(src):
+    """Extrahiert das Basisrufzeichen ohne SSID aus dem src-Feld."""
+    return src.split("-")[0]  # Trenne bei '-' und nimm den ersten Teil
+
+
 def show_help():
     """Hilfe anzeigen."""
     messagebox.showinfo("Hilfe", "Dieses Programm ermöglicht den Empfang und das Senden von Nachrichten über das Meshcom-Netzwerk, indem via UDP eine Verbindung zum Node hergestellt wird. Zur Nutzung mit dem Node ist hier vorher auf dem Node mit --extudpip <ip-adresse des Rechners> sowie --extudp on die Datenübertragung zu aktivieren und über die Einstellungen hier die IP-Adresse des Nodes anzugeben.")
@@ -328,6 +416,7 @@ menu_bar.add_cascade(label="Datei", menu=file_menu)
 settings_menu = tk.Menu(menu_bar, tearoff=0)
 settings_menu.add_command(label="Ziel-IP konfigurieren", command=configure_destination_ip)
 settings_menu.add_command(label="Eigenes Rufzeichen", command=configure_mycall)
+settings_menu.add_command(label="Watchlist", command=open_watchlist_dialog)
 settings_menu.add_command(label="Lautstärke konfigurieren", command=open_settings_dialog)
 menu_bar.add_cascade(label="Einstellungen", menu=settings_menu)
 
