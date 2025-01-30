@@ -16,6 +16,12 @@ This is a MeshCom-Client, that is written in Python for simple usage on a compat
 
 Now it should be running!
 
+## Key features
+
+* Grouping messages into tabs by destination (GRC or callsign)
+* alerting sound for new message
+* watchlist and alerting sound for callsigns in watchlist
+
 ## Troubles?
 
 If you have issues with emojis under linux, you could try `sudo apt-get install fonts-noto*` to install needed fonts

@@ -446,7 +446,7 @@ dst_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 send_button = tk.Button(input_frame, text="Senden", command=send_message)
 send_button.grid(row=0, column=2, rowspan=2, padx=5, pady=5, sticky="ns")
 
-tk.Label(input_frame, text="Letzter Uhrzeit vom Netz:").grid(row=0, column=3, padx=5, pady=5, sticky="w")
+tk.Label(input_frame, text="Letzter Uhrzeit vom Netz (UTC):").grid(row=0, column=3, padx=5, pady=5, sticky="w")
 net_time = tk.Entry(input_frame, width=25)
 net_time.grid(row=1, column=3, padx=5, pady=5)
 net_time.config(state="disabled")
