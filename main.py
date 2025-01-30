@@ -87,7 +87,7 @@ class WatchlistDialog(tk.Toplevel):
     def __init__(self, master, initial_volume, save_callback):
         super().__init__(master)
         self.title("Einstellungen")
-        self.geometry("500x400")
+        self.geometry("600x400")
         self.resizable(False, False)
 
         self.save_callback = save_callback
