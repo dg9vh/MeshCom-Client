@@ -24,7 +24,8 @@ DESTINATION_PORT = 1799  # Ziel-Port anpassen
 MAX_MESSAGE_LENGTH = 150  # Maximale Länge der Nachricht
 
 # Einstellungen
-CONFIG_FILE = "settings.ini"
+current_dir = os.getcwd()
+CONFIG_FILE = current_dir + "/settings.ini"
 config = configparser.ConfigParser()
 
 # Dictionary zur Verwaltung der Tabs
