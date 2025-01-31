@@ -277,7 +277,7 @@ def display_message(message):
     msg_text = msg_text.replace('"',"'")
     message_id = message.get("msg_id", '')
     
-    if dst_call == MYCALL:
+    if dst_call == MYCALL or src_call == MYCALL:
         dst_call = src_call
         msg_text = msg_text[:-4]
     
