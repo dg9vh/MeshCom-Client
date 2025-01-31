@@ -277,9 +277,12 @@ def display_message(message):
     msg_text = msg_text.replace('"',"'")
     message_id = message.get("msg_id", '')
     
-    if dst_call == MYCALL or src_call == MYCALL:
+    if dst_call == MYCALL:
         dst_call = src_call
         msg_text = msg_text[:-4]
+        
+    if src_call == MYCALL:
+        msg_text = msg_text[:-4] 
     
     if dst_call.find(',') > 0:
         dst_call = dst_call[:dst_call.find(',')]
