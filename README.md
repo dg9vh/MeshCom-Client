@@ -22,6 +22,8 @@ Now it should be running!
 * Alerting sound for new message
 * Watchlist and alerting sound for callsigns in watchlist
 * Restoring of chat-history on reopening chat-tabs
+* Reopen specific chat on demand
+* Delete complete chat history (also from restoring-source)
 
 ## Troubles?
 
