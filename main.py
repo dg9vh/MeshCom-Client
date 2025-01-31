@@ -21,7 +21,7 @@ UDP_PORT_NO = 1799
 
 DEFAULT_DST = "*"  # Standardziel für Nachrichten (Broadcast)
 DESTINATION_PORT = 1799  # Ziel-Port anpassen
-MAX_MESSAGE_LENGTH = 150  # Maximale Länge der Nachricht
+MAX_MESSAGE_LENGTH = 140  # Maximale Länge der Nachricht
 
 # Einstellungen
 current_dir = os.getcwd()
@@ -195,6 +195,28 @@ def save_chatlog(chat_data):
         print("Speichern beendet")
 
 
+# Funktion zum Löschen des Chatverlaufs
+def delete_chat(rufzeichen, text_widget, tab_control, tab):
+    global chat_storage
+
+    if rufzeichen in chat_storage:
+        # Bestätigung einholen
+        if messagebox.askyesno("Chat löschen", f"Soll der Chatverlauf für {rufzeichen} wirklich gelöscht werden?"):
+            # Entferne den Chat aus der Datei
+            del chat_storage[rufzeichen]
+            save_chatlog(chat_storage)
+
+            # Entferne den Chat aus der GUI (Textfeld leeren)
+            text_widget.delete("1.0", tk.END)
+
+            # Optional: Tab schließen
+            tab_control.forget(tab)
+
+            messagebox.showinfo("Gelöscht", f"Chatverlauf für {rufzeichen} wurde gelöscht.")
+    else:
+        messagebox.showwarning("Nicht gefunden", f"Kein Chatverlauf für {rufzeichen} vorhanden.")
+
+
 def load_chatlog():
     if os.path.exists(CHATLOG_FILE):
         with open(CHATLOG_FILE, "r") as f:
@@ -250,14 +272,18 @@ def receive_messages():
 def display_message(message):
     src_call = message.get('src', 'Unknown')
     dst_call = message.get('dst', 'Unknown')
+            
+    msg_text = message.get('msg', '')
+    msg_text = msg_text.replace('"',"'")
+    message_id = message.get("msg_id", '')
+    
     if dst_call == MYCALL:
         dst_call = src_call
+        msg_text = msg_text[:-4]
     
     if dst_call.find(',') > 0:
         dst_call = dst_call[:dst_call.find(',')]
-        
-    msg_text = message.get('msg', '')
-    message_id = message.get("msg_id", '')
+
     
     if message_id == '':
         return
@@ -355,6 +381,11 @@ def create_tab(dst_call):
 
     close_button = tk.Button(tab_header, text="X", command=lambda: close_tab(dst_call, tab_frame), width=2)
     close_button.pack(side=tk.RIGHT, padx=5)
+    
+    # Button zum Löschen des Chats
+    delete_button = tk.Button(tab_header, text="Chat löschen", command=lambda: delete_chat(dst_call, text_area, tab_control, tab_frame))
+    delete_button.pack(side=tk.RIGHT, padx=5)
+
 
     # Textfeld
     text_area = tk.Text(tab_frame, wrap=tk.WORD, state=tk.DISABLED, height=20, width=60)
@@ -427,6 +458,16 @@ def extract_callsign(src):
     return src.split("-")[0]  # Trenne bei '-' und nimm den ersten Teil
 
 
+# Lade Rufzeichen aus JSON-Datei
+def load_rufzeichen():
+    try:
+        with open("chatlog.json", "r", encoding="utf-8") as file:
+            data = json.load(file)
+        return list(data.keys())  # Holt alle Rufzeichen als Liste
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+    
+    
 def show_help():
     """Hilfe anzeigen."""
     messagebox.showinfo("Hilfe", "Dieses Programm ermöglicht den Empfang und das Senden von Nachrichten über das Meshcom-Netzwerk, indem via UDP eine Verbindung zum Node hergestellt wird. Zur Nutzung mit dem Node ist hier vorher auf dem Node mit --extudpip <ip-adresse des Rechners> sowie --extudp on die Datenübertragung zu aktivieren und über die Einstellungen hier die IP-Adresse des Nodes anzugeben.")
@@ -445,7 +486,7 @@ def on_closing():
 # GUI-Setup
 root = tk.Tk()
 root.title("MeshCom Client by DG9VH")
-root.geometry("800x400")  # Fenstergröße auf 800x400 setzen
+root.geometry("920x400")  # Fenstergröße auf 800x400 setzen
 root.protocol("WM_DELETE_WINDOW", on_closing)  # Fängt das Schließen ab
 
 load_settings()
@@ -497,6 +538,27 @@ tk.Label(input_frame, text="Letzte Uhrzeit vom Netz (UTC):").grid(row=0, column=
 net_time = tk.Entry(input_frame, width=25)
 net_time.grid(row=1, column=3, padx=5, pady=5)
 net_time.config(state="disabled")
+
+# Fülle die Listbox mit den Rufzeichen
+rufzeichen_liste = load_rufzeichen()
+
+# Erstelle Combobox
+selected_rufzeichen = tk.StringVar()
+combobox = ttk.Combobox(input_frame, textvariable=selected_rufzeichen, values=rufzeichen_liste, state="readonly")
+combobox.grid(row=2, column=3, padx=5, pady=5, sticky="w")
+
+def on_open_chat():
+    selected_value = selected_rufzeichen.get()
+    if selected_value:
+        create_tab(selected_value)
+    else:
+        messagebox.showwarning("Hinweis", "Bitte ein Rufzeichen auswählen!")
+
+
+# Button zum Öffnen des Chats
+open_button = tk.Button(input_frame, text="bisherigen Chat öffnen", command=on_open_chat).grid(row=2, column=4, padx=5, pady=5, sticky="w")
+    
+    
 
 tab_control.pack(expand=1, fill="both", padx=10, pady=10)
 
