@@ -281,7 +281,7 @@ def display_message(message):
         dst_call = src_call
         msg_text = msg_text[:-4]
         
-    if src_call == MYCALL:
+    if src_call == MYCALL and not (isinstance(dst_call, int) or dst_call =="*"):
         msg_text = msg_text[:-4] 
     
     if dst_call.find(',') > 0:
