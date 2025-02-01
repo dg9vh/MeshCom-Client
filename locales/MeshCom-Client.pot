@@ -46,7 +46,7 @@ msgid "Warnung"
 msgstr ""
 
 #: main.py:133
-msgid "ist bereits in der Watchlist."
+msgid "{callsign} ist bereits in der Watchlist."
 msgstr ""
 
 #: main.py:185

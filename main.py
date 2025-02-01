@@ -130,7 +130,7 @@ class WatchlistDialog(tk.Toplevel):
             self.entry_callsign.delete(0, tk.END)
             self.save_watchlist()
         elif callsign in watchlist:
-            messagebox.showwarning(_("Warnung"), callsign + " " + _(f"ist bereits in der Watchlist."))
+            messagebox.showwarning(_("Warnung"), ("{callsign} ist bereits in der Watchlist.").format(callsign=callsign))
 
 
     def remove_callsign(self):
@@ -182,7 +182,7 @@ def open_settings_dialog():
         global volume
         volume = new_volume
         save_settings()
-        print(_(f"Lautstärke gespeichert: {volume}"))
+        print(_("Lautstärke gespeichert: {volume}").format(volume=volume))
 
     SettingsDialog(root, volume, save_volume)
 
@@ -210,7 +210,7 @@ def delete_chat(rufzeichen, text_widget, tab_control, tab):
 
     if rufzeichen in chat_storage:
         # Bestätigung einholen
-        if messagebox.askyesno(_("Chat löschen"), _(f"Soll der Chatverlauf für {rufzeichen} wirklich gelöscht werden?").format(rufzeichen=rufzeichen)):
+        if messagebox.askyesno(_("Chat löschen"), _("Soll der Chatverlauf für {rufzeichen} wirklich gelöscht werden?").format(rufzeichen=rufzeichen)):
             # Entferne den Chat aus der Datei
             del chat_storage[rufzeichen]
             save_chatlog(chat_storage)
@@ -221,9 +221,9 @@ def delete_chat(rufzeichen, text_widget, tab_control, tab):
             # Optional: Tab schließen
             tab_control.forget(tab)
 
-            messagebox.showinfo(_("Gelöscht"), _(f"Chatverlauf für {rufzeichen} wurde gelöscht.").format(rufzeichen=rufzeichen))
+            messagebox.showinfo(_("Gelöscht"), _("Chatverlauf für {rufzeichen} wurde gelöscht.").format(rufzeichen=rufzeichen))
     else:
-        messagebox.showwarning(_("Nicht gefunden"), _(f"Kein Chatverlauf für {rufzeichen} vorhanden.").format(rufzeichen=rufzeichen))
+        messagebox.showwarning(_("Nicht gefunden"), _("Kein Chatverlauf für {rufzeichen} vorhanden.").format(rufzeichen=rufzeichen))
 
 
 def load_chatlog():
@@ -259,23 +259,24 @@ def play_sound_with_volume(file_path, volume=1.0):
         play_obj = wave_obj.play()
         play_obj.wait_done()  # Warten, bis der Ton fertig abgespielt ist
     except Exception as e:
-        print(_(f"Fehler beim Abspielen der Sounddatei: {e}").format(e=e))
+        print(_("Fehler beim Abspielen der Sounddatei: {e}").format(e=e))
         
 
 def receive_messages():
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_sock.bind((UDP_IP_ADDRESS, UDP_PORT_NO))
-    print(_(f"Server gestarted, hört auf {UDP_IP_ADDRESS}:{UDP_PORT_NO}").format(UDP_IP_ADDRESS=UDP_IP_ADDRESS, UDP_PORT_NO=UDP_PORT_NO))
+    print(_("Server gestarted, hört auf {UDP_IP_ADDRESS}:{UDP_PORT_NO}").format(UDP_IP_ADDRESS=UDP_IP_ADDRESS, UDP_PORT_NO=UDP_PORT_NO))
 
     while True:
         try:
             data, addr = server_sock.recvfrom(1024)
             decoded_data = data.decode('utf-8')
-            print(_(f"Daten empfangen von {addr}: {decoded_data}").format(addr=addr, decoded_data=decoded_data))
+            print(_("Daten empfangen von {addr}: {decoded_data}").format(addr=addr, decoded_data=decoded_data))
+
             json_data = json.loads(decoded_data)
             display_message(json_data)
         except Exception as e:
-            print(_(f"Es ist ein Fehler aufgetreten: {e}").format(e=e))
+            print(_("Es ist ein Fehler aufgetreten: {e}").format(e=e))
 
 
 def display_message(message):
@@ -302,7 +303,7 @@ def display_message(message):
         return
     
     if message_id in received_ids:
-        print(_(f"Nachricht mit ID {message_id} bereits empfangen und verarbeitet.").format(message_id=message_id))
+        print(_("Nachricht mit ID {message_id} bereits empfangen und verarbeitet.").format(message_id=message_id))
         return  # Nachricht wird ignoriert, da sie bereits verarbeitet wurde
     
     if msg_text == '':
@@ -330,7 +331,7 @@ def display_message(message):
     
     callsign = extract_callsign(src_call)
     if callsign in watchlist:
-        print(_(f"ALERT: {callsign} erkannt!").format(callsign=callsign))
+        print(_("ALERT: {callsign} erkannt!").format(callsign=callsign))
         play_sound_with_volume("alert.wav", volume)
     elif src_call != "You":
         play_sound_with_volume("klingel.wav", volume)
@@ -369,7 +370,7 @@ def send_message(event=None):
         client_sock.sendto(encoded_message, (DESTINATION_IP, DESTINATION_PORT))
         display_message({"src": "You", "dst": dst_call, "msg": msg_text})
     except Exception as e:
-        print(_(f"Fehler beim Senden: {e}").format(e=e))
+        print(_("Fehler beim Senden: {e}").format(e=e))
     finally:
         client_sock.close()
         message_entry.delete(0, tk.END)
@@ -453,7 +454,7 @@ def configure_destination_ip():
     if new_ip:
         DESTINATION_IP = new_ip
         save_settings()
-        messagebox.showinfo(_("Einstellung gespeichert"), _(f"Neue Ziel-IP: {DESTINATION_IP}").format(DESTINATION_IP=DESTINATION_IP))
+        messagebox.showinfo(_("Einstellung gespeichert"), _("Neue Ziel-IP: {DESTINATION_IP}").format(DESTINATION_IP=DESTINATION_IP))
 
 
 def configure_mycall():
@@ -463,7 +464,7 @@ def configure_mycall():
     if new_mycall:
         MYCALL = new_mycall
         save_settings()
-        messagebox.showinfo(_("Einstellung gespeichert"), _(f"Neues Rufzeichen: {MYCALL}").format(MYCALL=MYCALL))
+        messagebox.showinfo(_("Einstellung gespeichert"), _("Neues Rufzeichen: {MYCALL}").format(MYCALL=MYCALL))
 
 
 def set_language(lang):
