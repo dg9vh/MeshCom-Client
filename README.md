@@ -23,6 +23,27 @@ Now it should be running!
 * Restoring of chat-history on reopening chat-tabs
 * Reopen specific chat on demand
 * Delete complete chat history (also from restoring-source)
+* Multiple languages (actually German and English)
+
+## Functional areas
+### Message area upper left
+This is the place where you type your message and give the target group id or callsign. With a click on the send-button your message would be transfered via Lora to the next node and maybe to the internet server.
+
+### Timestamp upper right
+Within this box the timestamp transfered by the network every 5 minutes is shown. This is used as an indicator that the network is still alive.
+
+### reopen previous chat upper left
+As the MeshCom-Client is saving chat-history you are able to reopen chat-tabs and reload the content. With the selectbox you can select any stored chat-history and with the button you can reopen and reload the chat-history of this chat.
+
+### chat message tabs in the lower half
+This is the area where each group chat is grouped into a single tab per target. you can easily switch between the chats by selecting another tab. If there is any new message within a chat, it would be shown with a (new)-label on the tab-rider.
+
+There are also two buttons: delete chat deletes the chat (and it's stored history) and X closes only the tab (to be reopened, if a message comes in or if you reopen it manually).
+
+If you click on the target label, the (new)-marker would disappear in the opened tab, same if you switch over to another tab, then the label there would disappear.
+
+### Using Watchlist
+via Settings - Watchlist you can configure your personal watchlist. Here you add callsigns without SSID to be alerted with alert.wav-sound (you can replace individually to your favor).
 
 ## Troubles?
 

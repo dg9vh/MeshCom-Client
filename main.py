@@ -11,6 +11,8 @@ import simpleaudio as sa
 import wave
 import numpy as np
 import collections
+import gettext
+
 
 # Wir speichern die letzten 20 IDs in einer deque
 received_ids = collections.deque(maxlen=5)  # maxlen sorgt dafür, dass nur die letzten 5 IDs gespeichert werden
@@ -31,12 +33,15 @@ config = configparser.ConfigParser()
 # Chatlog
 CHATLOG_FILE = current_dir + "/chatlog.json"
 
+
 # Dictionary zur Verwaltung der Tabs
 tab_frames = {}
 tab_highlighted = set()  # Set für Tabs, die hervorgehoben werden sollen
 
 #Set für Watchlist
 watchlist = set()
+
+language = "de" # Standardsprache
 
 volume = 0.5  # Standardlautstärke (50%)
 
@@ -50,14 +55,14 @@ MYCALL = "DG9VH-99"
 class SettingsDialog(tk.Toplevel):
     def __init__(self, master, initial_volume, save_callback):
         super().__init__(master)
-        self.title("Einstellungen")
+        self.title(_("Einstellungen"))
         self.geometry("300x200")
         self.resizable(False, False)
 
         self.save_callback = save_callback
 
         # Lautstärke-Label
-        tk.Label(self, text="Lautstärke (0.0 bis 1.0):").pack(pady=10)
+        tk.Label(self, text=_("Lautstärke (0.0 bis 1.0):")).pack(pady=10)
 
         # Schieberegler für Lautstärke
         self.volume_slider = tk.Scale(
@@ -72,7 +77,7 @@ class SettingsDialog(tk.Toplevel):
         self.volume_slider.pack(pady=10)
 
         # Speichern-Button
-        ttk.Button(self, text="Speichern", command=self.save_settings).pack(pady=10)
+        ttk.Button(self, text=_("Speichern"), command=self.save_settings).pack(pady=10)
 
 
     def save_settings(self):
@@ -86,24 +91,24 @@ class WatchlistDialog(tk.Toplevel):
     global watchlist
     def __init__(self, master, initial_volume, save_callback):
         super().__init__(master)
-        self.title("Einstellungen")
+        self.title(_("Einstellungen"))
         self.geometry("600x400")
         self.resizable(False, False)
 
         self.save_callback = save_callback
 
-        tk.Label(self, text="Rufzeichen hinzufügen (ohne -SSID):").grid(row=0, column=0, sticky="w")
+        tk.Label(self, text=_("Rufzeichen hinzufügen (ohne -SSID):")).grid(row=0, column=0, sticky="w")
 
         self.entry_callsign = tk.Entry(self)
         self.entry_callsign.grid(row=0, column=1, padx=5)
 
-        self.btn_add = tk.Button(self, text="Hinzufügen", command=self.add_callsign)
+        self.btn_add = tk.Button(self, text=_("Hinzufügen"), command=self.add_callsign)
         self.btn_add.grid(row=0, column=2, padx=5)
 
         self.listbox = tk.Listbox(self, height=10, width=30)
         self.listbox.grid(row=1, column=0, columnspan=2, pady=5)
 
-        self.btn_remove = tk.Button(self, text="Löschen", command=self.remove_callsign)
+        self.btn_remove = tk.Button(self, text=_("Löschen"), command=self.remove_callsign)
         self.btn_remove.grid(row=1, column=2, padx=5)
 
         # Watchlist laden
@@ -125,7 +130,7 @@ class WatchlistDialog(tk.Toplevel):
             self.entry_callsign.delete(0, tk.END)
             self.save_watchlist()
         elif callsign in watchlist:
-            messagebox.showwarning("Warnung", f"{callsign} ist bereits in der Watchlist.")
+            messagebox.showwarning(_("Warnung"), _(f"{callsign} ist bereits in der Watchlist."))
 
 
     def remove_callsign(self):
@@ -146,17 +151,21 @@ class WatchlistDialog(tk.Toplevel):
 
 def load_settings():
     """Lädt Einstellungen aus der INI-Datei."""
-    global DESTINATION_IP, MYCALL, volume, watchlist
+    global DESTINATION_IP, MYCALL, volume, language, watchlist
     if os.path.exists(CONFIG_FILE):
         config.read(CONFIG_FILE)
         DESTINATION_IP = config.get("Settings", "DestinationIP", fallback=DESTINATION_IP)
         MYCALL = config.get("Settings", "MyCall", fallback=MYCALL)
         volume = config.getfloat("Settings", "Volume", fallback=0.5)
+        language = config.get("GUI", "Language", fallback="de")
         watchlist = set(config.get("watchlist", "callsigns", fallback="").split(","))
 
 
 def save_settings():
     """Speichert Einstellungen in die INI-Datei."""
+    config["GUI"] = {
+        "language": language,
+    }
     config["Settings"] = {
         "DestinationIP": DESTINATION_IP,
         "MYCALL": MYCALL,
@@ -173,7 +182,7 @@ def open_settings_dialog():
         global volume
         volume = new_volume
         save_settings()
-        print(f"Lautstärke gespeichert: {volume}")
+        print(_(f"Lautstärke gespeichert: {volume}"))
 
     SettingsDialog(root, volume, save_volume)
 
@@ -183,16 +192,16 @@ def open_watchlist_dialog():
         global watchlist
         watchlist = new_watchlist
         save_settings()
-        print(f"Watchlist gespeichert")
+        print(_(f"Watchlist gespeichert"))
 
     WatchlistDialog(root, watchlist, save_watchlist)
     
 
 def save_chatlog(chat_data):
     with open(CHATLOG_FILE, "w") as f:
-        print("Speichere Chatverlauf")
+        print(_("Speichere Chatverlauf"))
         json.dump(chat_data, f, indent=4)
-        print("Speichern beendet")
+        print(_("Speichern beendet"))
 
 
 # Funktion zum Löschen des Chatverlaufs
@@ -201,7 +210,7 @@ def delete_chat(rufzeichen, text_widget, tab_control, tab):
 
     if rufzeichen in chat_storage:
         # Bestätigung einholen
-        if messagebox.askyesno("Chat löschen", f"Soll der Chatverlauf für {rufzeichen} wirklich gelöscht werden?"):
+        if messagebox.askyesno(_("Chat löschen"), _(f"Soll der Chatverlauf für {rufzeichen} wirklich gelöscht werden?")):
             # Entferne den Chat aus der Datei
             del chat_storage[rufzeichen]
             save_chatlog(chat_storage)
@@ -212,9 +221,9 @@ def delete_chat(rufzeichen, text_widget, tab_control, tab):
             # Optional: Tab schließen
             tab_control.forget(tab)
 
-            messagebox.showinfo("Gelöscht", f"Chatverlauf für {rufzeichen} wurde gelöscht.")
+            messagebox.showinfo(_("Gelöscht"), _(f"Chatverlauf für {rufzeichen} wurde gelöscht."))
     else:
-        messagebox.showwarning("Nicht gefunden", f"Kein Chatverlauf für {rufzeichen} vorhanden.")
+        messagebox.showwarning(_("Nicht gefunden"), _(f"Kein Chatverlauf für {rufzeichen} vorhanden."))
 
 
 def load_chatlog():
@@ -250,23 +259,23 @@ def play_sound_with_volume(file_path, volume=1.0):
         play_obj = wave_obj.play()
         play_obj.wait_done()  # Warten, bis der Ton fertig abgespielt ist
     except Exception as e:
-        print(f"Fehler beim Abspielen der Sounddatei: {e}")
+        print(_(f"Fehler beim Abspielen der Sounddatei: {e}"))
         
 
 def receive_messages():
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_sock.bind((UDP_IP_ADDRESS, UDP_PORT_NO))
-    print(f"Server started, listening on {UDP_IP_ADDRESS}:{UDP_PORT_NO}")
+    print(_(f"Server gestarted, hört auf {UDP_IP_ADDRESS}:{UDP_PORT_NO}"))
 
     while True:
         try:
             data, addr = server_sock.recvfrom(1024)
             decoded_data = data.decode('utf-8')
-            print(f"Received data from {addr}: {decoded_data}")
+            print(_(f"Daten empfangen von {addr}: {decoded_data}"))
             json_data = json.loads(decoded_data)
             display_message(json_data)
         except Exception as e:
-            print(f"An error occurred: {e}")
+            print(_(f"Es ist ein Fehler aufgetreten: {e}"))
 
 
 def display_message(message):
@@ -279,9 +288,10 @@ def display_message(message):
     
     if dst_call == MYCALL:
         dst_call = src_call
-        msg_text = msg_text[:-4]
+        if  msg_text[-4] == "{":
+            msg_text = msg_text[:-4]
         
-    if src_call == MYCALL and not (isinstance(dst_call, int) or dst_call =="*"):
+    if src_call == MYCALL and msg_text[-4] == "{" and not (isinstance(dst_call, int) or dst_call =="*"):
         msg_text = msg_text[:-4] 
     
     if dst_call.find(',') > 0:
@@ -292,7 +302,7 @@ def display_message(message):
         return
     
     if message_id in received_ids:
-        print(f"Nachricht mit ID {message_id} bereits empfangen und verarbeitet.")
+        print(_(f"Nachricht mit ID {message_id} bereits empfangen und verarbeitet."))
         return  # Nachricht wird ignoriert, da sie bereits verarbeitet wurde
     
     if msg_text == '':
@@ -320,7 +330,7 @@ def display_message(message):
     
     callsign = extract_callsign(src_call)
     if callsign in watchlist:
-        print(f"ALERT: {callsign} erkannt!")
+        print(_(f"ALERT: {callsign} erkannt!"))
         play_sound_with_volume("alert.wav", volume)
     elif src_call != "You":
         play_sound_with_volume("klingel.wav", volume)
@@ -359,7 +369,7 @@ def send_message(event=None):
         client_sock.sendto(encoded_message, (DESTINATION_IP, DESTINATION_PORT))
         display_message({"src": "You", "dst": dst_call, "msg": msg_text})
     except Exception as e:
-        print(f"Error sending message: {e}")
+        print(_(f"Fehler beim Senden: {e}"))
     finally:
         client_sock.close()
         message_entry.delete(0, tk.END)
@@ -378,7 +388,7 @@ def create_tab(dst_call):
     tab_header = tk.Frame(tab_frame)
     tab_header.pack(side=tk.TOP, fill="x")
 
-    title_label = tk.Label(tab_header, text=f"Ziel: {dst_call}", anchor="w")
+    title_label = tk.Label(tab_header, text=_(f"Ziel: {dst_call}"), anchor="w")
     title_label.bind("<Button-1>", reset_tab_highlight)
     title_label.pack(side=tk.LEFT, padx=5)
 
@@ -386,7 +396,7 @@ def create_tab(dst_call):
     close_button.pack(side=tk.RIGHT, padx=5)
     
     # Button zum Löschen des Chats
-    delete_button = tk.Button(tab_header, text="Chat löschen", command=lambda: delete_chat(dst_call, text_area, tab_control, tab_frame))
+    delete_button = tk.Button(tab_header, text=_("Chat löschen"), command=lambda: delete_chat(dst_call, text_area, tab_control, tab_frame))
     delete_button.pack(side=tk.RIGHT, padx=5)
 
 
@@ -400,7 +410,7 @@ def create_tab(dst_call):
     
     tab_frames[dst_call] = text_area
     if dst_call in chat_storage:
-        print("Chat-Historie wiederherstellen")
+        print(_("Chat-Historie wiederherstellen"))
         for msg in chat_storage[dst_call]:
             tab_frames[dst_call].config(state=tk.NORMAL)
             tab_frames[dst_call].insert(tk.END, msg) # Chatverlauf in das Text-Widget einfügen
@@ -439,21 +449,30 @@ def reset_tab_highlight(event):
 def configure_destination_ip():
     """Dialog zur Konfiguration der Ziel-IP-Adresse."""
     global DESTINATION_IP
-    new_ip = simpledialog.askstring("Ziel-IP konfigurieren", "Geben Sie die neue Ziel-IP-Adresse ein:", initialvalue=DESTINATION_IP)
+    new_ip = simpledialog.askstring(_("Ziel-IP konfigurieren"), _("Geben Sie die neue Ziel-IP-Adresse ein:"), initialvalue=DESTINATION_IP)
     if new_ip:
         DESTINATION_IP = new_ip
         save_settings()
-        messagebox.showinfo("Einstellung gespeichert", f"Neue Ziel-IP: {DESTINATION_IP}")
+        messagebox.showinfo(_("Einstellung gespeichert"), _(f"Neue Ziel-IP: {DESTINATION_IP}"))
 
 
 def configure_mycall():
     """Dialog zur Konfiguration des eigenen Rufzeichens."""
     global MYCALL
-    new_mycall = simpledialog.askstring("Eigenes Rufzeichen konfigurieren", "Geben Sie das eigene Rufzeichen mit SSID ein:", initialvalue=MYCALL)
+    new_mycall = simpledialog.askstring(_("Eigenes Rufzeichen konfigurieren", "Geben Sie das eigene Rufzeichen mit SSID ein:"), initialvalue=MYCALL)
     if new_mycall:
         MYCALL = new_mycall
         save_settings()
-        messagebox.showinfo("Einstellung gespeichert", f"Neues Rufzeichen: {MYCALL}")
+        messagebox.showinfo(_("Einstellung gespeichert"), _(f"Neues Rufzeichen: {MYCALL}"))
+
+
+def set_language(lang):
+    """Setzt die Sprache in der Config-Datei und gibt eine Meldung aus."""
+    global language
+    language = lang
+    save_settings()
+    print (language)
+    messagebox.showinfo(_("Sprache geändert"), _("Die Sprache wurde geändert.\nBitte starten Sie das Programm neu."))
 
 
 def extract_callsign(src):
@@ -473,12 +492,12 @@ def load_rufzeichen():
     
 def show_help():
     """Hilfe anzeigen."""
-    messagebox.showinfo("Hilfe", "Dieses Programm ermöglicht den Empfang und das Senden von Nachrichten über das Meshcom-Netzwerk, indem via UDP eine Verbindung zum Node hergestellt wird. Zur Nutzung mit dem Node ist hier vorher auf dem Node mit --extudpip <ip-adresse des Rechners> sowie --extudp on die Datenübertragung zu aktivieren und über die Einstellungen hier die IP-Adresse des Nodes anzugeben.")
+    messagebox.showinfo(_("Hilfe"), _("Dieses Programm ermöglicht den Empfang und das Senden von Nachrichten über das Meshcom-Netzwerk, indem via UDP eine Verbindung zum Node hergestellt wird. Zur Nutzung mit dem Node ist hier vorher auf dem Node mit --extudpip <ip-adresse des Rechners> sowie --extudp on die Datenübertragung zu aktivieren und über die Einstellungen hier die IP-Adresse des Nodes anzugeben."))
 
 
 def show_about():
     """Über-Dialog anzeigen."""
-    messagebox.showinfo("Über", "MeshCom Client\nVersion 1.0\nEntwickelt von DG9VH")
+    messagebox.showinfo(_("Über"), _("MeshCom Client\nVersion 1.0\nEntwickelt von DG9VH"))
 
 
 def on_closing():
@@ -494,6 +513,13 @@ root.protocol("WM_DELETE_WINDOW", on_closing)  # Fängt das Schließen ab
 
 load_settings()
 
+appname = 'MeshCom-Client'
+localedir = current_dir + "/locales"
+
+# initialisiere Gettext
+en_i18n = gettext.translation(appname, localedir, fallback=True, languages=[language])
+en_i18n.install()
+
 chat_storage = load_chatlog()  # Lädt vorhandene Chatlogs beim Programmstart
 
 # Menüleiste
@@ -501,20 +527,27 @@ menu_bar = tk.Menu(root)
 root.config(menu=menu_bar)
 
 file_menu = tk.Menu(menu_bar, tearoff=0)
-file_menu.add_command(label="Beenden", command=root.quit)
-menu_bar.add_cascade(label="Datei", menu=file_menu)
+file_menu.add_command(label=_("Beenden"), command=root.quit)
+menu_bar.add_cascade(label=_("Datei"), menu=file_menu)
 
 settings_menu = tk.Menu(menu_bar, tearoff=0)
-settings_menu.add_command(label="Ziel-IP konfigurieren", command=configure_destination_ip)
-settings_menu.add_command(label="Eigenes Rufzeichen", command=configure_mycall)
-settings_menu.add_command(label="Watchlist", command=open_watchlist_dialog)
-settings_menu.add_command(label="Lautstärke konfigurieren", command=open_settings_dialog)
-menu_bar.add_cascade(label="Einstellungen", menu=settings_menu)
+settings_menu.add_command(label=_("Ziel-IP konfigurieren"), command=configure_destination_ip)
+settings_menu.add_command(label=_("Eigenes Rufzeichen"), command=configure_mycall)
+settings_menu.add_command(label=_("Watchlist"), command=open_watchlist_dialog)
+settings_menu.add_command(label=_("Lautstärke konfigurieren"), command=open_settings_dialog)
+# Untermenü „Sprache“ hinzufügen
+language_menu = tk.Menu(settings_menu, tearoff=0)
+settings_menu.add_cascade(label=_("Sprache"), menu=language_menu)
+# Sprachoptionen hinzufügen
+language_menu.add_command(label="Deutsch", command=lambda: set_language("de"))
+language_menu.add_command(label="English", command=lambda: set_language("en"))
+
+menu_bar.add_cascade(label=_("Einstellungen"), menu=settings_menu)
 
 help_menu = tk.Menu(menu_bar, tearoff=0)
-help_menu.add_command(label="Hilfe", command=show_help)
-help_menu.add_command(label="Über", command=show_about)
-menu_bar.add_cascade(label="Hilfe", menu=help_menu)
+help_menu.add_command(label=_("Hilfe"), command=show_help)
+help_menu.add_command(label=_("Über"), command=show_about)
+menu_bar.add_cascade(label=_("Hilfe"), menu=help_menu)
 
 tab_control = ttk.Notebook(root)
 tab_control.bind("<<NotebookTabChanged>>", reset_tab_highlight)
@@ -522,22 +555,22 @@ tab_control.bind("<<NotebookTabChanged>>", reset_tab_highlight)
 input_frame = tk.Frame(root)
 input_frame.pack(fill="x", padx=10, pady=5)
 
-tk.Label(input_frame, text="Nachricht:").grid(row=0, column=0, padx=5, pady=5, sticky="e")
+tk.Label(input_frame, text=_("Nachricht:")).grid(row=0, column=0, padx=5, pady=5, sticky="e")
 
 vcmd = root.register(validate_length)  # Validation-Command registrieren
 message_entry = tk.Entry(input_frame, width=40, validate="key", validatecommand=(vcmd, "%P"))
 message_entry.grid(row=0, column=1, padx=5, pady=5)
 message_entry.bind("<Return>", send_message) 
 
-tk.Label(input_frame, text="Ziel:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
+tk.Label(input_frame, text=_("Ziel:")).grid(row=1, column=0, padx=5, pady=5, sticky="e")
 dst_entry = tk.Entry(input_frame, width=20)
 dst_entry.insert(0, DEFAULT_DST)
 dst_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 
-send_button = tk.Button(input_frame, text="Senden", command=send_message)
+send_button = tk.Button(input_frame, text=_("Senden"), command=send_message)
 send_button.grid(row=0, column=2, rowspan=2, padx=5, pady=5, sticky="ns")
 
-tk.Label(input_frame, text="Letzte Uhrzeit vom Netz (UTC):").grid(row=0, column=3, padx=5, pady=5, sticky="w")
+tk.Label(input_frame, text=_("Letzte Uhrzeit vom Netz (UTC):")).grid(row=0, column=3, padx=5, pady=5, sticky="w")
 net_time = tk.Entry(input_frame, width=25)
 net_time.grid(row=1, column=3, padx=5, pady=5)
 net_time.config(state="disabled")
@@ -555,11 +588,11 @@ def on_open_chat():
     if selected_value:
         create_tab(selected_value)
     else:
-        messagebox.showwarning("Hinweis", "Bitte ein Rufzeichen auswählen!")
+        messagebox.showwarning(_("Hinweis"), _("Bitte ein Rufzeichen auswählen!"))
 
 
 # Button zum Öffnen des Chats
-open_button = tk.Button(input_frame, text="bisherigen Chat öffnen", command=on_open_chat).grid(row=2, column=4, padx=5, pady=5, sticky="w")
+open_button = tk.Button(input_frame, text=_("bisherigen Chat öffnen"), command=on_open_chat).grid(row=2, column=4, padx=5, pady=5, sticky="w")
     
     
 
