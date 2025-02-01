@@ -155,9 +155,15 @@ msgstr "Settings saved"
 msgid "Neue Ziel-IP: {DESTINATION_IP}"
 msgstr "New destination: {DESTINATION_IP}"
 
-#: main.py:463
+
+
+#: main.py:462
 msgid "Eigenes Rufzeichen konfigurieren"
 msgstr "Configure own callsign"
+
+#: main.py:462
+msgid "Geben Sie das eigene Rufzeichen mit SSID ein:"
+msgstr "Enter own callsign with SSID:"
 
 #: main.py:467
 #, python-brace-format

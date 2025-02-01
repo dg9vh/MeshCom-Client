@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-01 19:50+0100\n"
+"POT-Creation-Date: 2025-02-01 20:38+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -46,8 +46,7 @@ msgid "Warnung"
 msgstr ""
 
 #: main.py:133
-#, python-brace-format
-msgid "{callsign} ist bereits in der Watchlist."
+msgid "ist bereits in der Watchlist."
 msgstr ""
 
 #: main.py:185
@@ -129,9 +128,8 @@ msgstr ""
 msgid "Fehler beim Senden: {e}"
 msgstr ""
 
-#: main.py:391
-#, python-brace-format
-msgid "Ziel: {dst_call}"
+#: main.py:391 main.py:565
+msgid "Ziel:"
 msgstr ""
 
 #: main.py:413
@@ -157,6 +155,10 @@ msgstr ""
 
 #: main.py:462
 msgid "Eigenes Rufzeichen konfigurieren"
+msgstr ""
+
+#: main.py:462
+msgid "Geben Sie das eigene Rufzeichen mit SSID ein:"
 msgstr ""
 
 #: main.py:466
@@ -225,10 +227,6 @@ msgstr ""
 
 #: main.py:558
 msgid "Nachricht:"
-msgstr ""
-
-#: main.py:565
-msgid "Ziel:"
 msgstr ""
 
 #: main.py:570
