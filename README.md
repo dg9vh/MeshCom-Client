@@ -1,8 +1,7 @@
 # MeshCom-Client
 A MeshCom-Client, written in Python, for using with MeshCom (https://icssw.org/meshcom/) Nodes
 
-![Screenshot of application](https://github.com/user-attachments/assets/d390800a-c63a-42d7-a085-616bf8567c67)
-
+![image](https://github.com/user-attachments/assets/60b6d916-7173-42fe-9ea1-8844415e176a)
 
 ## What is this about?
 This is a MeshCom-Client, that is written in Python for simple usage on a compatible computer system. Initially it is with very basic functionality but I think it will grow up over the next weeks :-)
