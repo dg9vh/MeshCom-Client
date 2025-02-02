@@ -292,16 +292,12 @@ def display_message(message):
         dst_call = src_call
         if  msg_text[-4] == "{":
             msg_tag = msg_text[-3:]
-            print(msg_tag)
             msg_text = msg_text[:-4]
-            
-        print(msg_text)
-        print(len(msg_text))
+        
         if msg_text.find("ack") > 0:
                 msg_text = msg_text[msg_text.find("ack"):]
                 if msg_text[0:3] == "ack" and len(msg_text) == 6:
                     msg_tag = msg_text [-3:]
-                    print(f"msg-tag: {msg_tag}")
                     if dst_call.find(',') > 0:
                         dst_call = dst_call[:dst_call.find(',')]
                     tab_frames[dst_call].tag_config(msg_tag, foreground="green")  # Ändere die Farbe
@@ -310,13 +306,11 @@ def display_message(message):
             
     if src_call == MYCALL and msg_text[-4] == "{" and not (isinstance(dst_call, int) or dst_call =="*"):
         msg_tag = msg_text[-3:]
-        print(msg_tag)
         msg_text = msg_text[:-4] 
     
     if dst_call.find(',') > 0:
         dst_call = dst_call[:dst_call.find(',')]
 
-    
     if message_id == '':
         return
     
