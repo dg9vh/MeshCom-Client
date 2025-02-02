@@ -286,13 +286,31 @@ def display_message(message):
     msg_text = message.get('msg', '')
     msg_text = msg_text.replace('"',"'")
     message_id = message.get("msg_id", '')
+    msg_tag = ""
     
     if dst_call == MYCALL:
         dst_call = src_call
         if  msg_text[-4] == "{":
+            msg_tag = msg_text[-3:]
+            print(msg_tag)
             msg_text = msg_text[:-4]
-        
+            
+        print(msg_text)
+        print(len(msg_text))
+        if msg_text.find("ack") > 0:
+                msg_text = msg_text[msg_text.find("ack"):]
+                if msg_text[0:3] == "ack" and len(msg_text) == 6:
+                    msg_tag = msg_text [-3:]
+                    print(f"msg-tag: {msg_tag}")
+                    if dst_call.find(',') > 0:
+                        dst_call = dst_call[:dst_call.find(',')]
+                    tab_frames[dst_call].tag_config(msg_tag, foreground="green")  # Ändere die Farbe
+                    #tab_frames[dst_call].insert(msg_tag + " wordend", " ✓")  # Häkchen anfügen
+                    return
+            
     if src_call == MYCALL and msg_text[-4] == "{" and not (isinstance(dst_call, int) or dst_call =="*"):
+        msg_tag = msg_text[-3:]
+        print(msg_tag)
         msg_text = msg_text[:-4] 
     
     if dst_call.find(',') > 0:
@@ -322,8 +340,11 @@ def display_message(message):
         create_tab(dst_call)
 
     display_text = f"{timestamp} - {src_call}: {msg_text}\n"
+    start_index = tab_frames[dst_call].index("end-1c linestart")
     tab_frames[dst_call].config(state=tk.NORMAL)
     tab_frames[dst_call].insert(tk.END, display_text)
+    tab_frames[dst_call].tag_add(msg_tag, start_index, f"{start_index} lineend")
+    tab_frames[dst_call].tag_config(start_index, foreground="black")
     tab_frames[dst_call].config(state=tk.DISABLED)
     tab_frames[dst_call].yview(tk.END)
     
