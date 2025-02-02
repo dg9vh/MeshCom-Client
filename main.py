@@ -465,11 +465,11 @@ def reset_tab_highlight(event):
 def configure_destination_ip():
     """Dialog zur Konfiguration der Ziel-IP-Adresse."""
     global DESTINATION_IP
-    new_ip = simpledialog.askstring(_("Ziel-IP konfigurieren"), _("Geben Sie die neue Ziel-IP-Adresse ein:"), initialvalue=DESTINATION_IP)
+    new_ip = simpledialog.askstring(_("Node-IP konfigurieren"), _("Geben Sie die neue Node-IP-Adresse ein:"), initialvalue=DESTINATION_IP)
     if new_ip:
         DESTINATION_IP = new_ip
         save_settings()
-        messagebox.showinfo(_("Einstellung gespeichert"), _("Neue Ziel-IP: {DESTINATION_IP}").format(DESTINATION_IP=DESTINATION_IP))
+        messagebox.showinfo(_("Einstellung gespeichert"), _("Neue Node-IP: {DESTINATION_IP}").format(DESTINATION_IP=DESTINATION_IP))
 
 
 def configure_mycall():
@@ -547,7 +547,7 @@ file_menu.add_command(label=_("Beenden"), command=root.quit)
 menu_bar.add_cascade(label=_("Datei"), menu=file_menu)
 
 settings_menu = tk.Menu(menu_bar, tearoff=0)
-settings_menu.add_command(label=_("Ziel-IP konfigurieren"), command=configure_destination_ip)
+settings_menu.add_command(label=_("Node-IP konfigurieren"), command=configure_destination_ip)
 settings_menu.add_command(label=_("Eigenes Rufzeichen"), command=configure_mycall)
 settings_menu.add_command(label=_("Watchlist"), command=open_watchlist_dialog)
 settings_menu.add_command(label=_("Lautstärke konfigurieren"), command=open_settings_dialog)
