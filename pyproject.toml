@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "MeshCom-Client"
+version = "1.0.2"
+description = "Python MeshCom-Client for udp communication with MeshCom nodes"
+dependencies = ["numpy==1.24.2", "simpleaudio==1.0.4"]
+
+# Scripts einbinden
+[project.scripts]
+MeshCom-Client = "MeshCom_Client.__main__:main"
+
+#[tool.setuptools.packages.find]
+#where = ["MeshCom_Client"]

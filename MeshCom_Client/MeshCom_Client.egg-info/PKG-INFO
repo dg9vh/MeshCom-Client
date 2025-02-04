@@ -1,0 +1,6 @@
+Metadata-Version: 2.2
+Name: MeshCom-Client
+Version: 1.0.0
+Summary: Python MeshCom-Client for udp communication with MeshCom nodes
+Requires-Dist: numpy==1.24.2
+Requires-Dist: simpleaudio==1.0.4

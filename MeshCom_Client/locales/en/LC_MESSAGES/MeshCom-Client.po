@@ -1,0 +1,256 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-02-02 21:04+0100\n"
+"PO-Revision-Date: 2025-02-02 22:51+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.4\n"
+
+#: main.py:58 main.py:94 main.py:561
+msgid "Einstellungen"
+msgstr "Settings"
+
+#: main.py:65
+msgid "Lautstärke (0.0 bis 1.0):"
+msgstr "Volume (0.0 to 1.0):"
+
+#: main.py:80
+msgid "Speichern"
+msgstr "Save"
+
+#: main.py:100
+msgid "Rufzeichen hinzufügen (ohne -SSID):"
+msgstr "Add callsign (without -SSID):"
+
+#: main.py:105
+msgid "Hinzufügen"
+msgstr "Add"
+
+#: main.py:111
+msgid "Löschen"
+msgstr "Delete"
+
+#: main.py:133
+msgid "Warnung"
+msgstr "Warning"
+
+#: main.py:185
+#, python-brace-format
+msgid "Lautstärke gespeichert: {volume}"
+msgstr "Volume saved: {volume}"
+
+#: main.py:195
+msgid "Watchlist gespeichert"
+msgstr "Watchlist saved"
+
+#: main.py:202
+msgid "Speichere Chatverlauf"
+msgstr "Save chat history"
+
+#: main.py:204
+msgid "Speichern beendet"
+msgstr "Saved"
+
+#: main.py:213 main.py:415
+msgid "Chat löschen"
+msgstr "Delete chat"
+
+#: main.py:213
+#, python-brace-format
+msgid "Soll der Chatverlauf für {rufzeichen} wirklich gelöscht werden?"
+msgstr "Sure to delete chat history for {rufzeichen}?"
+
+#: main.py:224
+msgid "Gelöscht"
+msgstr "Deleted"
+
+#: main.py:224
+#, python-brace-format
+msgid "Chatverlauf für {rufzeichen} wurde gelöscht."
+msgstr "Chat history for {rufzeichen} deleted."
+
+#: main.py:226
+msgid "Nicht gefunden"
+msgstr "Not found"
+
+#: main.py:226
+#, python-brace-format
+msgid "Kein Chatverlauf für {rufzeichen} vorhanden."
+msgstr "No chat history for {rufzeichen} found."
+
+#: main.py:262
+#, python-brace-format
+msgid "Fehler beim Abspielen der Sounddatei: {e}"
+msgstr "Error playing soundfile: {e}"
+
+#: main.py:268
+#, python-brace-format
+msgid "Server gestarted, hört auf {UDP_IP_ADDRESS}:{UDP_PORT_NO}"
+msgstr "Server started, listening on {UDP_IP_ADDRESS}:{UDP_PORT_NO}"
+
+#: main.py:274
+#, python-brace-format
+msgid "Daten empfangen von {addr}: {decoded_data}"
+msgstr "Data received from {addr}: {decoded_data}"
+
+#: main.py:279
+#, python-brace-format
+msgid "Es ist ein Fehler aufgetreten: {e}"
+msgstr "An error occurred: {e}"
+
+#: main.py:318
+#, python-brace-format
+msgid "Nachricht mit ID {message_id} bereits empfangen und verarbeitet."
+msgstr "Message ID {message_id} already received and proceed."
+
+#: main.py:349
+#, python-brace-format
+msgid "ALERT: {callsign} erkannt!"
+msgstr "ALERT: {callsign} recognized!"
+
+#: main.py:388
+#, python-brace-format
+msgid "Fehler beim Senden: {e}"
+msgstr "Error at sending: {e}"
+
+#: main.py:407 main.py:581
+msgid "Ziel:"
+msgstr "Target:"
+
+#: main.py:429
+msgid "Chat-Historie wiederherstellen"
+msgstr "Restore chat history"
+
+#: main.py:468 main.py:550
+msgid "Node-IP konfigurieren"
+msgstr "Configure node-ip"
+
+#: main.py:468
+msgid "Geben Sie die neue Node-IP-Adresse ein:"
+msgstr "Enter new node ip-address:"
+
+#: main.py:472 main.py:482
+msgid "Einstellung gespeichert"
+msgstr "Settings saved"
+
+#: main.py:472
+#, python-brace-format
+msgid "Neue Node-IP: {DESTINATION_IP}"
+msgstr "New node-IP: {DESTINATION_IP}"
+
+#: main.py:478
+msgid "Eigenes Rufzeichen konfigurieren"
+msgstr "Configure own callsign"
+
+#: main.py:478
+msgid "Geben Sie das eigene Rufzeichen mit SSID ein:"
+msgstr "Enter your own callsign with SSID:"
+
+#: main.py:482
+#, python-brace-format
+msgid "Neues Rufzeichen: {MYCALL}"
+msgstr "New callsign: {MYCALL}"
+
+#: main.py:491
+msgid "Sprache geändert"
+msgstr "Language changed"
+
+#: main.py:491
+msgid ""
+"Die Sprache wurde geändert.\n"
+"Bitte starten Sie das Programm neu."
+msgstr ""
+"The language was switched.\n"
+"Please restart the program."
+
+#: main.py:511 main.py:564 main.py:566
+msgid "Hilfe"
+msgstr "Help"
+
+#: main.py:511
+msgid ""
+"Dieses Programm ermöglicht den Empfang und das Senden von Nachrichten über "
+"das Meshcom-Netzwerk, indem via UDP eine Verbindung zum Node hergestellt "
+"wird. Zur Nutzung mit dem Node ist hier vorher auf dem Node mit --extudpip "
+"<ip-adresse des Rechners> sowie --extudp on die Datenübertragung zu "
+"aktivieren und über die Einstellungen hier die IP-Adresse des Nodes "
+"anzugeben."
+msgstr ""
+"This program is for receiving and sending messages over the MeshCom-"
+"Network. It is using UDP-protocol to the node. For using this, you have to "
+"enable this via --extudpip <ip-address of your computer> and --extudp on "
+"and configure the ip-address of the node as destination."
+
+#: main.py:516 main.py:565
+msgid "Über"
+msgstr "About"
+
+#: main.py:516
+msgid ""
+"MeshCom Client\n"
+"Version 1.0\n"
+"Entwickelt von DG9VH"
+msgstr ""
+"MeshCom Client\n"
+"Version 1.0\n"
+"Developed by DG9VH"
+
+#: main.py:546
+msgid "Beenden"
+msgstr "Exit"
+
+#: main.py:547
+msgid "Datei"
+msgstr "File"
+
+#: main.py:551
+msgid "Eigenes Rufzeichen"
+msgstr "Own Callsign"
+
+#: main.py:552
+msgid "Watchlist"
+msgstr "Watchlist"
+
+#: main.py:553
+msgid "Lautstärke konfigurieren"
+msgstr "Configure Volume"
+
+#: main.py:556
+msgid "Sprache"
+msgstr "Language"
+
+#: main.py:574
+msgid "Nachricht:"
+msgstr "Message:"
+
+#: main.py:586
+msgid "Senden"
+msgstr "Send"
+
+#: main.py:589
+msgid "Letzte Uhrzeit vom Netz (UTC):"
+msgstr "Last timestamp (in UTC) from network:"
+
+#: main.py:607
+msgid "Hinweis"
+msgstr "Notice"
+
+#: main.py:607
+msgid "Bitte ein Rufzeichen auswählen!"
+msgstr "Please select a callsign!"
+
+#: main.py:611
+msgid "bisherigen Chat öffnen"
+msgstr "reopen previus chat"

@@ -1,0 +1,2 @@
+[console_scripts]
+MeshCom-Client = MeshCom_Client.__main__:main

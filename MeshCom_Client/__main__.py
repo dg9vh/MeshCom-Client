@@ -2,6 +2,7 @@
 import os
 import configparser
 from datetime import datetime
+from pathlib import Path
 import socket
 import json
 import threading
@@ -13,6 +14,9 @@ import numpy as np
 import collections
 import gettext
 
+
+# Versionsnummer
+VERSION="1.0.2"
 
 # Wir speichern die letzten 20 IDs in einer deque
 received_ids = collections.deque(maxlen=5)  # maxlen sorgt dafür, dass nur die letzten 5 IDs gespeichert werden
@@ -27,11 +31,11 @@ MAX_MESSAGE_LENGTH = 140  # Maximale Länge der Nachricht
 
 # Einstellungen
 current_dir = os.getcwd()
-CONFIG_FILE = current_dir + "/settings.ini"
+CONFIG_FILE = Path(__file__).parent / 'settings.ini'
 config = configparser.ConfigParser()
 
 # Chatlog
-CHATLOG_FILE = current_dir + "/chatlog.json"
+CHATLOG_FILE = Path(__file__).parent / 'chatlog.json'
 
 
 # Dictionary zur Verwaltung der Tabs
@@ -240,8 +244,11 @@ def play_sound_with_volume(file_path, volume=1.0):
     :param volume: Lautstärke (zwischen 0.0 und 1.0).
     """
     try:
+        # Pfad zur Datei in einen String umwandeln
+        file_path_str = str(Path(__file__).parent / "sounds" / file_path)
+        
         # Öffne die WAV-Datei
-        with wave.open(file_path, "rb") as wav_file:
+        with wave.open(file_path_str, "rb") as wav_file:
             # Lese die WAV-Datei
             frames = wav_file.readframes(wav_file.getnframes())
             sample_width = wav_file.getsampwidth()
@@ -347,9 +354,9 @@ def display_message(message):
     callsign = extract_callsign(src_call)
     if callsign in watchlist:
         print(_("ALERT: {callsign} erkannt!").format(callsign=callsign))
-        play_sound_with_volume("alert.wav", volume)
+        play_sound_with_volume('alert.wav', volume)
     elif src_call != "You":
-        play_sound_with_volume("klingel.wav", volume)
+        play_sound_with_volume('klingel.wav', volume)
 
     # Tab hervorheben
     highlight_tab(dst_call)
@@ -499,7 +506,7 @@ def extract_callsign(src):
 # Lade Rufzeichen aus JSON-Datei
 def load_rufzeichen():
     try:
-        with open("chatlog.json", "r", encoding="utf-8") as file:
+        with open(CHATLOG_FILE, "r", encoding="utf-8") as file:
             data = json.load(file)
         return list(data.keys())  # Holt alle Rufzeichen als Liste
     except (FileNotFoundError, json.JSONDecodeError):
@@ -512,108 +519,114 @@ def show_help():
 
 
 def show_about():
+    global VERSION
     """Über-Dialog anzeigen."""
-    messagebox.showinfo(_("Über"), _("MeshCom Client\nVersion 1.0\nEntwickelt von DG9VH"))
+    messagebox.showinfo(_("Über"), _("MeshCom Client\nVersion {VERSION}\nEntwickelt von DG9VH").format(VERSION=VERSION))
 
 
 def on_closing():
     save_chatlog(chat_storage)  # Speichert alle offenen Chats
     root.destroy()  # Schließt das Tkinter-Fenster
 
+def main():
+    global root, tab_control, chat_storage, dst_entry, message_entry, net_time
+    # GUI-Setup
+    root = tk.Tk()
+    root.title(f"MeshCom Client {VERSION} by DG9VH")
+    root.geometry("920x400")  # Fenstergröße auf 800x400 setzen
+    root.protocol("WM_DELETE_WINDOW", on_closing)  # Fängt das Schließen ab
 
-# GUI-Setup
-root = tk.Tk()
-root.title("MeshCom Client by DG9VH")
-root.geometry("920x400")  # Fenstergröße auf 800x400 setzen
-root.protocol("WM_DELETE_WINDOW", on_closing)  # Fängt das Schließen ab
+    load_settings()
 
-load_settings()
+    appname = 'MeshCom-Client'
+    localedir = current_dir + "/locales"
 
-appname = 'MeshCom-Client'
-localedir = current_dir + "/locales"
+    # initialisiere Gettext
+    en_i18n = gettext.translation(appname, localedir, fallback=True, languages=[language])
+    en_i18n.install()
 
-# initialisiere Gettext
-en_i18n = gettext.translation(appname, localedir, fallback=True, languages=[language])
-en_i18n.install()
+    chat_storage = load_chatlog()  # Lädt vorhandene Chatlogs beim Programmstart
 
-chat_storage = load_chatlog()  # Lädt vorhandene Chatlogs beim Programmstart
+    # Menüleiste
+    menu_bar = tk.Menu(root)
+    root.config(menu=menu_bar)
 
-# Menüleiste
-menu_bar = tk.Menu(root)
-root.config(menu=menu_bar)
+    file_menu = tk.Menu(menu_bar, tearoff=0)
+    file_menu.add_command(label=_("Beenden"), command=root.quit)
+    menu_bar.add_cascade(label=_("Datei"), menu=file_menu)
 
-file_menu = tk.Menu(menu_bar, tearoff=0)
-file_menu.add_command(label=_("Beenden"), command=root.quit)
-menu_bar.add_cascade(label=_("Datei"), menu=file_menu)
+    settings_menu = tk.Menu(menu_bar, tearoff=0)
+    settings_menu.add_command(label=_("Node-IP konfigurieren"), command=configure_destination_ip)
+    settings_menu.add_command(label=_("Eigenes Rufzeichen"), command=configure_mycall)
+    settings_menu.add_command(label=_("Watchlist"), command=open_watchlist_dialog)
+    settings_menu.add_command(label=_("Lautstärke konfigurieren"), command=open_settings_dialog)
+    # Untermenü „Sprache“ hinzufügen
+    language_menu = tk.Menu(settings_menu, tearoff=0)
+    settings_menu.add_cascade(label=_("Sprache"), menu=language_menu)
+    # Sprachoptionen hinzufügen
+    language_menu.add_command(label="Deutsch", command=lambda: set_language("de"))
+    language_menu.add_command(label="English", command=lambda: set_language("en"))
 
-settings_menu = tk.Menu(menu_bar, tearoff=0)
-settings_menu.add_command(label=_("Node-IP konfigurieren"), command=configure_destination_ip)
-settings_menu.add_command(label=_("Eigenes Rufzeichen"), command=configure_mycall)
-settings_menu.add_command(label=_("Watchlist"), command=open_watchlist_dialog)
-settings_menu.add_command(label=_("Lautstärke konfigurieren"), command=open_settings_dialog)
-# Untermenü „Sprache“ hinzufügen
-language_menu = tk.Menu(settings_menu, tearoff=0)
-settings_menu.add_cascade(label=_("Sprache"), menu=language_menu)
-# Sprachoptionen hinzufügen
-language_menu.add_command(label="Deutsch", command=lambda: set_language("de"))
-language_menu.add_command(label="English", command=lambda: set_language("en"))
+    menu_bar.add_cascade(label=_("Einstellungen"), menu=settings_menu)
 
-menu_bar.add_cascade(label=_("Einstellungen"), menu=settings_menu)
+    help_menu = tk.Menu(menu_bar, tearoff=0)
+    help_menu.add_command(label=_("Hilfe"), command=show_help)
+    help_menu.add_command(label=_("Über"), command=show_about)
+    menu_bar.add_cascade(label=_("Hilfe"), menu=help_menu)
 
-help_menu = tk.Menu(menu_bar, tearoff=0)
-help_menu.add_command(label=_("Hilfe"), command=show_help)
-help_menu.add_command(label=_("Über"), command=show_about)
-menu_bar.add_cascade(label=_("Hilfe"), menu=help_menu)
+    tab_control = ttk.Notebook(root)
+    tab_control.bind("<<NotebookTabChanged>>", reset_tab_highlight)
 
-tab_control = ttk.Notebook(root)
-tab_control.bind("<<NotebookTabChanged>>", reset_tab_highlight)
+    input_frame = tk.Frame(root)
+    input_frame.pack(fill="x", padx=10, pady=5)
 
-input_frame = tk.Frame(root)
-input_frame.pack(fill="x", padx=10, pady=5)
+    tk.Label(input_frame, text=_("Nachricht:")).grid(row=0, column=0, padx=5, pady=5, sticky="e")
 
-tk.Label(input_frame, text=_("Nachricht:")).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+    vcmd = root.register(validate_length)  # Validation-Command registrieren
+    message_entry = tk.Entry(input_frame, width=40, validate="key", validatecommand=(vcmd, "%P"))
+    message_entry.grid(row=0, column=1, padx=5, pady=5)
+    message_entry.bind("<Return>", send_message) 
 
-vcmd = root.register(validate_length)  # Validation-Command registrieren
-message_entry = tk.Entry(input_frame, width=40, validate="key", validatecommand=(vcmd, "%P"))
-message_entry.grid(row=0, column=1, padx=5, pady=5)
-message_entry.bind("<Return>", send_message) 
+    tk.Label(input_frame, text=_("Ziel:")).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+    dst_entry = tk.Entry(input_frame, width=20)
+    dst_entry.insert(0, DEFAULT_DST)
+    dst_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 
-tk.Label(input_frame, text=_("Ziel:")).grid(row=1, column=0, padx=5, pady=5, sticky="e")
-dst_entry = tk.Entry(input_frame, width=20)
-dst_entry.insert(0, DEFAULT_DST)
-dst_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
+    send_button = tk.Button(input_frame, text=_("Senden"), command=send_message)
+    send_button.grid(row=0, column=2, rowspan=2, padx=5, pady=5, sticky="ns")
 
-send_button = tk.Button(input_frame, text=_("Senden"), command=send_message)
-send_button.grid(row=0, column=2, rowspan=2, padx=5, pady=5, sticky="ns")
+    tk.Label(input_frame, text=_("Letzte Uhrzeit vom Netz (UTC):")).grid(row=0, column=3, padx=5, pady=5, sticky="w")
+    net_time = tk.Entry(input_frame, width=25)
+    net_time.grid(row=1, column=3, padx=5, pady=5, sticky="w")
+    net_time.config(state="disabled")
 
-tk.Label(input_frame, text=_("Letzte Uhrzeit vom Netz (UTC):")).grid(row=0, column=3, padx=5, pady=5, sticky="w")
-net_time = tk.Entry(input_frame, width=25)
-net_time.grid(row=1, column=3, padx=5, pady=5, sticky="w")
-net_time.config(state="disabled")
+    # Fülle die Listbox mit den Rufzeichen
+    rufzeichen_liste = load_rufzeichen()
 
-# Fülle die Listbox mit den Rufzeichen
-rufzeichen_liste = load_rufzeichen()
+    # Erstelle Combobox
+    selected_rufzeichen = tk.StringVar()
+    combobox = ttk.Combobox(input_frame, textvariable=selected_rufzeichen, values=rufzeichen_liste, state="readonly")
+    combobox.grid(row=2, column=3, padx=5, pady=5, sticky="w")
 
-# Erstelle Combobox
-selected_rufzeichen = tk.StringVar()
-combobox = ttk.Combobox(input_frame, textvariable=selected_rufzeichen, values=rufzeichen_liste, state="readonly")
-combobox.grid(row=2, column=3, padx=5, pady=5, sticky="w")
-
-def on_open_chat():
-    selected_value = selected_rufzeichen.get()
-    if selected_value:
-        create_tab(selected_value)
-    else:
-        messagebox.showwarning(_("Hinweis"), _("Bitte ein Rufzeichen auswählen!"))
+    def on_open_chat():
+        selected_value = selected_rufzeichen.get()
+        if selected_value:
+            create_tab(selected_value)
+        else:
+            messagebox.showwarning(_("Hinweis"), _("Bitte ein Rufzeichen auswählen!"))
 
 
-# Button zum Öffnen des Chats
-open_button = tk.Button(input_frame, text=_("bisherigen Chat öffnen"), command=on_open_chat).grid(row=2, column=4, padx=5, pady=5, sticky="w")
-    
-    
+    # Button zum Öffnen des Chats
+    open_button = tk.Button(input_frame, text=_("bisherigen Chat öffnen"), command=on_open_chat).grid(row=2, column=4, padx=5, pady=5, sticky="w")
+        
+        
 
-tab_control.pack(expand=1, fill="both", padx=10, pady=10)
+    tab_control.pack(expand=1, fill="both", padx=10, pady=10)
 
-threading.Thread(target=receive_messages, daemon=True).start()
+    threading.Thread(target=receive_messages, daemon=True).start()
 
-root.mainloop()
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
