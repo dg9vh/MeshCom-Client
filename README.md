@@ -60,7 +60,7 @@ Easiest way to install this is to use `pipx install MeshCom_Client`.
 
 If you have a previous installation done with pipx you just have to use `pipx upgrade MeshCom_Client` for getting the lastest version. Maybe you have to do this more than once till it says that meshcom-client is already at latest version.
 
-
+If you want to know, how to install pipx on your system, consult [GitHub - pypa/pipx: Install and Run Python Applications in Isolated Environments](https://github.com/pypa/pipx)
 
 ## Troubles?
 
