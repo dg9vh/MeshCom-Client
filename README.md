@@ -62,6 +62,10 @@ If you have a previous installation done with pipx you just have to use `pipx up
 
 If you want to know, how to install pipx on your system, consult [GitHub - pypa/pipx: Install and Run Python Applications in Isolated Environments](https://github.com/pypa/pipx)
 
+After installation, you can simply start the client running `MeshCom-Client` from console.
+
+Settings-file and chat-log could be found at `.local/pipx/venvs/meshcom-client/lib/python3.11/site-packages/MeshCom_Client/` or similar.
+
 ## Troubles?
 
 If you have issues with emojis under linux, you could try `sudo apt-get install fonts-noto*` to install needed fonts
