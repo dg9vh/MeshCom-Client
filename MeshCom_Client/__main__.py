@@ -14,9 +14,15 @@ import numpy as np
 import collections
 import gettext
 
+from importlib.metadata import version, PackageNotFoundError
 
-# Versionsnummer
-VERSION="1.0.2"
+try:
+    __version__ = version("MeshCom-Client")
+except PackageNotFoundError:
+    __version__ = "unknown"
+
+print(f"MeshCom-Client Version: {__version__}")
+
 
 # Wir speichern die letzten 20 IDs in einer deque
 received_ids = collections.deque(maxlen=5)  # maxlen sorgt dafür, dass nur die letzten 5 IDs gespeichert werden
@@ -30,7 +36,7 @@ DESTINATION_PORT = 1799  # Ziel-Port anpassen
 MAX_MESSAGE_LENGTH = 140  # Maximale Länge der Nachricht
 
 # Einstellungen
-current_dir = os.getcwd()
+current_dir = Path(__file__).parent
 CONFIG_FILE = Path(__file__).parent / 'settings.ini'
 config = configparser.ConfigParser()
 
@@ -519,9 +525,9 @@ def show_help():
 
 
 def show_about():
-    global VERSION
+    global __version__
     """Über-Dialog anzeigen."""
-    messagebox.showinfo(_("Über"), _("MeshCom Client\nVersion {VERSION}\nEntwickelt von DG9VH").format(VERSION=VERSION))
+    messagebox.showinfo(_("Über"), _("MeshCom Client\nVersion {__version__}\nEntwickelt von DG9VH").format(__version__=__version__))
 
 
 def on_closing():
@@ -532,14 +538,14 @@ def main():
     global root, tab_control, chat_storage, dst_entry, message_entry, net_time
     # GUI-Setup
     root = tk.Tk()
-    root.title(f"MeshCom Client {VERSION} by DG9VH")
+    root.title(f"MeshCom Client {__version__} by DG9VH")
     root.geometry("920x400")  # Fenstergröße auf 800x400 setzen
     root.protocol("WM_DELETE_WINDOW", on_closing)  # Fängt das Schließen ab
 
     load_settings()
 
     appname = 'MeshCom-Client'
-    localedir = current_dir + "/locales"
+    localedir = current_dir / "locales"
 
     # initialisiere Gettext
     en_i18n = gettext.translation(appname, localedir, fallback=True, languages=[language])

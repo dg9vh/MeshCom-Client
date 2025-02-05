@@ -1,1 +1,3 @@
 include MeshCom_Client/sounds/*.wav
+recursive-include MeshCom_Client/locales *
+
