@@ -51,6 +51,9 @@ tab_highlighted = set()  # Set für Tabs, die hervorgehoben werden sollen
 #Set für Watchlist
 watchlist = set()
 
+# Dictionary zum Speichern der Text-Widgets für verschiedene Rufzeichen-Tabs
+text_areas = {}
+
 language = "de" # Standardsprache
 
 volume = 0.5  # Standardlautstärke (50%)
@@ -410,6 +413,7 @@ def validate_length(new_text):
 
 
 def create_tab(dst_call):
+    global text_areas
     tab_frame = ttk.Frame(tab_control)
     tab_control.add(tab_frame, text=dst_call)
 
@@ -431,7 +435,11 @@ def create_tab(dst_call):
 
     # Textfeld
     text_area = tk.Text(tab_frame, wrap=tk.WORD, state=tk.DISABLED, height=20, width=60)
+    text_area.bind("<ButtonRelease-1>", lambda event, call=dst_call: on_message_click(event, call))
     text_area.pack(side=tk.LEFT, expand=1, fill="both", padx=10, pady=10)
+    
+    # Speichern des Widgets im Dictionary
+    text_areas[dst_call] = text_area
 
     scrollbar = tk.Scrollbar(tab_frame, orient=tk.VERTICAL, command=text_area.yview)
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -517,7 +525,36 @@ def load_rufzeichen():
         return list(data.keys())  # Holt alle Rufzeichen als Liste
     except (FileNotFoundError, json.JSONDecodeError):
         return []
-    
+
+
+def on_message_click(event, dst_call):
+    """Wird aufgerufen, wenn eine Nachricht in der TextArea angeklickt wird"""
+    global message_entry
+    try:
+        text_widget = text_areas.get(dst_call)
+        if not text_widget:
+            return  # Falls kein Text-Widget gefunden wird
+
+        # Mausposition bestimmen
+        index = text_widget.index(f"@{event.x},{event.y}")
+
+        # Zeile holen
+        line_start = f"{index.split('.')[0]}.0"
+        line_end = f"{index.split('.')[0]}.end"
+        message_text = text_widget.get(line_start, line_end).strip()
+
+        # Nachricht parsen: Rufzeichen extrahieren
+        parts = message_text.split(" - ")
+        if len(parts) > 1:
+            sender_info = parts[1].split(":")[0]  # Teil vor dem ersten Doppelpunkt nehmen
+            sender_callsign = sender_info.split(",")[0]  # Erstes Rufzeichen extrahieren
+            
+            # Rufzeichen in die Eingabebox setzen
+            message_entry.delete(0, tk.END)
+            message_entry.insert(0, f"{sender_callsign}: ")
+    except Exception as e:
+        print(f"Fehler beim Parsen der Nachricht: {e}")
+
     
 def show_help():
     """Hilfe anzeigen."""
