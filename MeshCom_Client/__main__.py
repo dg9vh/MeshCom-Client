@@ -33,7 +33,7 @@ UDP_PORT_NO = 1799
 
 DEFAULT_DST = "*"  # Standardziel für Nachrichten (Broadcast)
 DESTINATION_PORT = 1799  # Ziel-Port anpassen
-MAX_MESSAGE_LENGTH = 140  # Maximale Länge der Nachricht
+MAX_MESSAGE_LENGTH = 149  # Maximale Länge der Nachricht
 
 # Einstellungen
 current_dir = Path(__file__).parent
@@ -409,6 +409,9 @@ def send_message(event=None):
 
 def validate_length(new_text):
     """Validiert die Länge der Eingabe."""
+    global characters_left
+    chars_left = MAX_MESSAGE_LENGTH - len(new_text)
+    characters_left.config(text = str(chars_left))
     return len(new_text) <= MAX_MESSAGE_LENGTH
 
 
@@ -572,7 +575,7 @@ def on_closing():
     root.destroy()  # Schließt das Tkinter-Fenster
 
 def main():
-    global root, tab_control, chat_storage, dst_entry, message_entry, net_time
+    global root, tab_control, chat_storage, dst_entry, message_entry, net_time, characters_left
     # GUI-Setup
     root = tk.Tk()
     root.title(f"MeshCom Client {__version__} by DG9VH")
@@ -629,11 +632,16 @@ def main():
     message_entry = tk.Entry(input_frame, width=40, validate="key", validatecommand=(vcmd, "%P"))
     message_entry.grid(row=0, column=1, padx=5, pady=5)
     message_entry.bind("<Return>", send_message) 
+    
+    
+    tk.Label(input_frame, text=_("Zeichen übrig:")).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+    characters_left = tk.Label(input_frame, text="149")
+    characters_left.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 
-    tk.Label(input_frame, text=_("Ziel:")).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+    tk.Label(input_frame, text=_("Ziel:")).grid(row=2, column=0, padx=5, pady=5, sticky="e")
     dst_entry = tk.Entry(input_frame, width=20)
     dst_entry.insert(0, DEFAULT_DST)
-    dst_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
+    dst_entry.grid(row=2, column=1, padx=5, pady=5, sticky="w")
 
     send_button = tk.Button(input_frame, text=_("Senden"), command=send_message)
     send_button.grid(row=0, column=2, rowspan=2, padx=5, pady=5, sticky="ns")
