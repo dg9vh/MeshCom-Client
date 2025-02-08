@@ -76,6 +76,7 @@ If you have issues with emojis under linux, you could try `sudo apt-get install 
 * Integration in "flutter"(Android and iOS-compatibility)
 * Configuration-Dialog for sounds and new sound for "own call messages"
 * Displaying positions of stations (when receiving a pos-message) on a map (OSM)
+* Counter for characters left in message (UDP-maximum 149 chars)
 
 ## Contributions
 
