@@ -74,7 +74,6 @@ If you have issues with emojis under linux, you could try `sudo apt-get install 
 
 * View counter of new messages in tab
 * Integration in "flutter"(Android and iOS-compatibility)
-* Configuration-Dialog for sounds and new sound for "own call messages"
 * Displaying positions of stations (when receiving a pos-message) on a map (OSM)
 
 ## Contributions
