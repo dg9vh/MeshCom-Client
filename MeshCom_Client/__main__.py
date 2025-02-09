@@ -7,7 +7,7 @@ import socket
 import json
 import threading
 import tkinter as tk
-from tkinter import ttk, simpledialog, messagebox
+from tkinter import ttk, simpledialog, messagebox, filedialog
 import simpleaudio as sa
 import wave
 import numpy as np
@@ -43,6 +43,13 @@ config = configparser.ConfigParser()
 # Chatlog
 CHATLOG_FILE = Path(__file__).parent / 'chatlog.json'
 
+# Audio-Dateien
+NEW_MESSAGE = Path(__file__).parent / "sounds" / "new_message.wav"
+
+CALLSIGN_ALERT = Path(__file__).parent / "sounds" / "alert.wav"
+
+OWN_CALLSIGN = Path(__file__).parent / "sounds" / "mycall.wav"
+
 
 # Dictionary zur Verwaltung der Tabs
 tab_frames = {}
@@ -66,10 +73,10 @@ MYCALL = "DG9VH-99"
 
 
 class SettingsDialog(tk.Toplevel):
-    def __init__(self, master, initial_volume, save_callback):
+    def __init__(self, master, initial_volume, initial_new_message, initial_callsign_alert, initial_owncall_alert, save_callback):
         super().__init__(master)
         self.title(_("Einstellungen"))
-        self.geometry("300x200")
+        self.geometry("700x450")
         self.resizable(False, False)
 
         self.save_callback = save_callback
@@ -89,14 +96,54 @@ class SettingsDialog(tk.Toplevel):
         self.volume_slider.set(initial_volume)
         self.volume_slider.pack(pady=10)
 
+        #tk.Label(self, text=_("Neue Nachricht:")).pack(pady=10)        
+        self.new_message_label = tk.Label(self, text = _("Neue Nachricht:") + " " + initial_new_message, width=200)
+        self.new_message_label.pack(pady=10)
+        ttk.Button(self, text=_("Datei wählen"), command = self.choose_new_message_file).pack(pady=10)
+        
+        #tk.Label(self, text=_("Watchlist-Hinweis:")).pack(pady=10)
+        self.callsign_alert_label = tk.Label(self, text = _("Watchlist-Hinweis:") + " " + initial_callsign_alert, width=200)
+        self.callsign_alert_label.pack(pady=10)
+        ttk.Button(self, text=_("Datei wählen"), command = self.choose_callsign_alert_file).pack(pady=10)
+        
+        #tk.Label(self, text=_("Eigenes Rufzeichen-Hinweis:")).pack(pady=10)
+        self.owncall_alert_label = tk.Label(self, text = _("Eigenes Rufzeichen-Hinweis:") + " " + initial_owncall_alert, width=200)
+        self.owncall_alert_label.pack(pady=10)
+        ttk.Button(self, text=_("Datei wählen"), command = self.choose_owncall_alert_file).pack(pady=10)
+
+        
         # Speichern-Button
-        ttk.Button(self, text=_("Speichern"), command=self.save_settings).pack(pady=10)
+        ttk.Button(self, text=_("Speichern"), command = self.save_settings).pack(pady=10)
+
+
+    def choose_new_message_file(self):
+        global NEW_MESSAGE
+        """Öffnet einen Datei-Dialog und setzt die Variable auf den ausgewählten Dateinamen."""
+        NEW_MESSAGE = filedialog.askopenfilename(filetypes=[("WAV-Dateien", "*.wav")])
+        
+        self.new_message_label.config(text = _("Neue Nachricht:") + " " + NEW_MESSAGE)
+
+
+    def choose_callsign_alert_file(self):
+        global CALLSIGN_ALERT
+        """Öffnet einen Datei-Dialog und setzt die Variable auf den ausgewählten Dateinamen."""
+        CALLSIGN_ALERT = filedialog.askopenfilename(filetypes=[("WAV-Dateien", "*.wav")])
+        
+        self.callsign_alert_label.config(text = _("Watchlist-Hinweis:") + " " + CALLSIGN_ALERT)
+
+
+    def choose_owncall_alert_file(self):
+        global OWN_CALLSIGN
+        """Öffnet einen Datei-Dialog und setzt die Variable auf den ausgewählten Dateinamen."""
+        OWN_CALLSIGN = filedialog.askopenfilename(filetypes=[("WAV-Dateien", "*.wav")])
+        
+        self.owncall_alert_label.config(text = _("Eigenes Rufzeichen-Hinweis:") + " " + OWN_CALLSIGN)
 
 
     def save_settings(self):
         # Lautstärke speichern und zurückgeben
         volume = self.volume_slider.get()
-        self.save_callback(volume)
+        self.save_callback(volume, NEW_MESSAGE, CALLSIGN_ALERT, OWN_CALLSIGN)
         self.destroy()
         
 
@@ -164,7 +211,7 @@ class WatchlistDialog(tk.Toplevel):
 
 def load_settings():
     """Lädt Einstellungen aus der INI-Datei."""
-    global DESTINATION_IP, MYCALL, volume, language, watchlist
+    global DESTINATION_IP, MYCALL, volume, language, watchlist, NEW_MESSAGE, CALLSIGN_ALERT, OWN_CALLSIGN
     if os.path.exists(CONFIG_FILE):
         config.read(CONFIG_FILE)
         DESTINATION_IP = config.get("Settings", "DestinationIP", fallback=DESTINATION_IP)
@@ -172,6 +219,10 @@ def load_settings():
         volume = config.getfloat("Settings", "Volume", fallback=0.5)
         language = config.get("GUI", "Language", fallback="de")
         watchlist = set(config.get("watchlist", "callsigns", fallback="").split(","))
+        
+        NEW_MESSAGE = config.get("Audio", "new_message", fallback=NEW_MESSAGE)
+        CALLSIGN_ALERT = config.get("Audio", "callsign_alert", fallback=CALLSIGN_ALERT)
+        OWN_CALLSIGN = config.get("Audio", "own_callsign", fallback=OWN_CALLSIGN)
 
 
 def save_settings():
@@ -184,6 +235,11 @@ def save_settings():
         "MYCALL": MYCALL,
         "Volume": volume,
     }
+    config["Audio"] = {
+        "new_message": NEW_MESSAGE,
+        "callsign_alert": CALLSIGN_ALERT,
+        "own_callsign": OWN_CALLSIGN,
+    }
     config["watchlist"] = {"callsigns": ",".join(watchlist)}
     
     with open(CONFIG_FILE, "w") as configfile:
@@ -191,13 +247,19 @@ def save_settings():
 
 
 def open_settings_dialog():
-    def save_volume(new_volume):
-        global volume
+    def save_audio_settings(new_volume, new_newmessage, new_callsign_alert, new_own_callsign):
+        global volume, NEW_MESSAGE
         volume = new_volume
+        NEW_MESSAGE = new_newmessage
+        CALLSIGN_ALERT = new_callsign_alert
+        OWN_CALLSIGN = new_own_callsign
         save_settings()
         print(_("Lautstärke gespeichert: {volume}").format(volume=volume))
+        print(_("Neue Nachricht-Hinweis: {NEW_MESSAGE}").format(NEW_MESSAGE=NEW_MESSAGE))
+        print(_("Rufzeichen-Hinweis: {CALLSIGN_ALERT}").format(CALLSIGN_ALERT=CALLSIGN_ALERT))
+        print(_("Eigenes-Rufzeichen-Hinweis: {OWN_CALLSIGN}").format(OWN_CALLSIGN=OWN_CALLSIGN))
 
-    SettingsDialog(root, volume, save_volume)
+    SettingsDialog(root, volume, NEW_MESSAGE, CALLSIGN_ALERT, OWN_CALLSIGN, save_audio_settings)
 
 
 def open_watchlist_dialog():
@@ -361,11 +423,19 @@ def display_message(message):
     add_message(dst_call, display_text)
     
     callsign = extract_callsign(src_call)
+    print(f"Callsign: {callsign}")
+    print(f"src_call: {src_call}")
+    print(f"MYCALL: {MYCALL}")
+    print(MYCALL)
     if callsign in watchlist:
         print(_("ALERT: {callsign} erkannt!").format(callsign=callsign))
-        play_sound_with_volume('alert.wav', volume)
+        play_sound_with_volume(CALLSIGN_ALERT, volume)
+    elif src_call == MYCALL:
+        print(_("ALERT: Eigenes Rufzeichen").format(callsign=callsign))
+        play_sound_with_volume(OWN_CALLSIGN, volume)
     elif src_call != "You":
-        play_sound_with_volume('klingel.wav', volume)
+        print(_("ALERT: Normale Nachricht").format(callsign=callsign))
+        play_sound_with_volume(NEW_MESSAGE, volume)
 
     # Tab hervorheben
     highlight_tab(dst_call)
@@ -579,7 +649,7 @@ def main():
     # GUI-Setup
     root = tk.Tk()
     root.title(f"MeshCom Client {__version__} by DG9VH")
-    root.geometry("920x400")  # Fenstergröße auf 800x400 setzen
+    root.geometry("950x400")  # Fenstergröße auf 950x400 setzen
     root.protocol("WM_DELETE_WINDOW", on_closing)  # Fängt das Schließen ab
 
     load_settings()
@@ -605,7 +675,7 @@ def main():
     settings_menu.add_command(label=_("Node-IP konfigurieren"), command=configure_destination_ip)
     settings_menu.add_command(label=_("Eigenes Rufzeichen"), command=configure_mycall)
     settings_menu.add_command(label=_("Watchlist"), command=open_watchlist_dialog)
-    settings_menu.add_command(label=_("Lautstärke konfigurieren"), command=open_settings_dialog)
+    settings_menu.add_command(label=_("Audioeinstellungen"), command=open_settings_dialog)
     # Untermenü „Sprache“ hinzufügen
     language_menu = tk.Menu(settings_menu, tearoff=0)
     settings_menu.add_cascade(label=_("Sprache"), menu=language_menu)

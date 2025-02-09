@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-08 18:19+0100\n"
-"PO-Revision-Date: 2025-02-08 18:55+0100\n"
+"POT-Creation-Date: 2025-02-09 16:56+0100\n"
+"PO-Revision-Date: 2025-02-09 17:00+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -18,156 +18,195 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.4.4\n"
 
-#: __main__.py:71 __main__.py:107 __main__.py:616
+#: __main__.py:78 __main__.py:154 __main__.py:686
 msgid "Einstellungen"
 msgstr "Settings"
 
-#: __main__.py:78
+#: __main__.py:85
 msgid "Lautstärke (0.0 bis 1.0):"
 msgstr "Volume (0.0 to 1.0):"
 
-#: __main__.py:93
+#: __main__.py:100 __main__.py:124
+msgid "Neue Nachricht:"
+msgstr "New Message:"
+
+#: __main__.py:102 __main__.py:107 __main__.py:112
+msgid "Datei wählen"
+msgstr "Chose File"
+
+#: __main__.py:105 __main__.py:132
+msgid "Watchlist-Hinweis:"
+msgstr "Watchlist-Alert:"
+
+#: __main__.py:110 __main__.py:140
+msgid "Eigenes Rufzeichen-Hinweis:"
+msgstr "Own Callsign-Alert:"
+
+#: __main__.py:116
 msgid "Speichern"
 msgstr "Save"
 
-#: __main__.py:113
+#: __main__.py:160
 msgid "Rufzeichen hinzufügen (ohne -SSID):"
 msgstr "Add callsign (without -SSID):"
 
-#: __main__.py:118
+#: __main__.py:165
 msgid "Hinzufügen"
 msgstr "Add"
 
-#: __main__.py:124
+#: __main__.py:171
 msgid "Löschen"
 msgstr "Delete"
 
-#: __main__.py:146
+#: __main__.py:193
 msgid "Warnung"
 msgstr "Warning"
 
-#: __main__.py:198
+#: __main__.py:257
 #, python-brace-format
 msgid "Lautstärke gespeichert: {volume}"
 msgstr "Volume saved: {volume}"
 
-#: __main__.py:208
+#: __main__.py:258
+#, python-brace-format
+msgid "Neue Nachricht-Hinweis: {NEW_MESSAGE}"
+msgstr "New-Message-Alert: {NEW_MESSAGE}"
+
+#: __main__.py:259
+#, python-brace-format
+msgid "Rufzeichen-Hinweis: {CALLSIGN_ALERT}"
+msgstr "Callsign-Alert: {CALLSIGN_ALERT}"
+
+#: __main__.py:260
+#, python-brace-format
+msgid "Eigenes-Rufzeichen-Hinweis: {OWN_CALLSIGN}"
+msgstr "Own-Callsign-Alert: {OWN_CALLSIGN}"
+
+#: __main__.py:270
 msgid "Watchlist gespeichert"
 msgstr "Watchlist saved"
 
-#: __main__.py:215
+#: __main__.py:277
 msgid "Speichere Chatverlauf"
 msgstr "Save chat history"
 
-#: __main__.py:217
+#: __main__.py:279
 msgid "Speichern beendet"
 msgstr "Saved"
 
-#: __main__.py:226 __main__.py:435
+#: __main__.py:288 __main__.py:505
 msgid "Chat löschen"
 msgstr "Delete chat"
 
-#: __main__.py:226
+#: __main__.py:288
 #, python-brace-format
 msgid "Soll der Chatverlauf für {rufzeichen} wirklich gelöscht werden?"
 msgstr "Sure to delete chat history for {rufzeichen}?"
 
-#: __main__.py:237
+#: __main__.py:299
 msgid "Gelöscht"
 msgstr "Deleted"
 
-#: __main__.py:237
+#: __main__.py:299
 #, python-brace-format
 msgid "Chatverlauf für {rufzeichen} wurde gelöscht."
 msgstr "Chat history for {rufzeichen} deleted."
 
-#: __main__.py:239
+#: __main__.py:301
 msgid "Nicht gefunden"
 msgstr "Not found"
 
-#: __main__.py:239
+#: __main__.py:301
 #, python-brace-format
 msgid "Kein Chatverlauf für {rufzeichen} vorhanden."
 msgstr "No chat history for {rufzeichen} found."
 
-#: __main__.py:278
+#: __main__.py:340
 #, python-brace-format
 msgid "Fehler beim Abspielen der Sounddatei: {e}"
 msgstr "Error playing soundfile: {e}"
 
-#: __main__.py:284
+#: __main__.py:346
 #, python-brace-format
 msgid "Server gestarted, hört auf {UDP_IP_ADDRESS}:{UDP_PORT_NO}"
 msgstr "Server started, listening on {UDP_IP_ADDRESS}:{UDP_PORT_NO}"
 
-#: __main__.py:290
+#: __main__.py:352
 #, python-brace-format
 msgid "Daten empfangen von {addr}: {decoded_data}"
 msgstr "Data received from {addr}: {decoded_data}"
 
-#: __main__.py:295
+#: __main__.py:357
 #, python-brace-format
 msgid "Es ist ein Fehler aufgetreten: {e}"
 msgstr "An error occurred: {e}"
 
-#: __main__.py:334
+#: __main__.py:396
 #, python-brace-format
 msgid "Nachricht mit ID {message_id} bereits empfangen und verarbeitet."
 msgstr "Message ID {message_id} already received and proceed."
 
-#: __main__.py:365
+#: __main__.py:431
 #, python-brace-format
 msgid "ALERT: {callsign} erkannt!"
 msgstr "ALERT: {callsign} recognized!"
 
-#: __main__.py:404
+#: __main__.py:434
+msgid "ALERT: Eigenes Rufzeichen"
+msgstr "Alert: Own Callsign"
+
+#: __main__.py:437
+msgid "ALERT: Normale Nachricht"
+msgstr "ALERT: New Message"
+
+#: __main__.py:474
 #, python-brace-format
 msgid "Fehler beim Senden: {e}"
 msgstr "Error at sending: {e}"
 
-#: __main__.py:427 __main__.py:641
+#: __main__.py:497 __main__.py:711
 msgid "Ziel:"
 msgstr "Target:"
 
-#: __main__.py:453
+#: __main__.py:523
 msgid "Chat-Historie wiederherstellen"
 msgstr "Restore chat history"
 
-#: __main__.py:492 __main__.py:605
+#: __main__.py:562 __main__.py:675
 msgid "Node-IP konfigurieren"
 msgstr "Configure node-ip"
 
-#: __main__.py:492
+#: __main__.py:562
 msgid "Geben Sie die neue Node-IP-Adresse ein:"
 msgstr "Enter new node ip-address:"
 
-#: __main__.py:496 __main__.py:506
+#: __main__.py:566 __main__.py:576
 msgid "Einstellung gespeichert"
 msgstr "Settings saved"
 
-#: __main__.py:496
+#: __main__.py:566
 #, python-brace-format
 msgid "Neue Node-IP: {DESTINATION_IP}"
 msgstr "New node-IP: {DESTINATION_IP}"
 
-#: __main__.py:502
+#: __main__.py:572
 msgid "Eigenes Rufzeichen konfigurieren"
 msgstr "Configure own callsign"
 
-#: __main__.py:502
+#: __main__.py:572
 msgid "Geben Sie das eigene Rufzeichen mit SSID ein:"
 msgstr "Enter your own callsign with SSID:"
 
-#: __main__.py:506
+#: __main__.py:576
 #, python-brace-format
 msgid "Neues Rufzeichen: {MYCALL}"
 msgstr "New callsign: {MYCALL}"
 
-#: __main__.py:515
+#: __main__.py:585
 msgid "Sprache geändert"
 msgstr "Language changed"
 
-#: __main__.py:515
+#: __main__.py:585
 msgid ""
 "Die Sprache wurde geändert.\n"
 "Bitte starten Sie das Programm neu."
@@ -175,11 +214,11 @@ msgstr ""
 "The language was switched.\n"
 "Please restart the program."
 
-#: __main__.py:564 __main__.py:619 __main__.py:621
+#: __main__.py:634 __main__.py:689 __main__.py:691
 msgid "Hilfe"
 msgstr "Help"
 
-#: __main__.py:564
+#: __main__.py:634
 msgid ""
 "Dieses Programm ermöglicht den Empfang und das Senden von Nachrichten über "
 "das Meshcom-Netzwerk, indem via UDP eine Verbindung zum Node hergestellt "
@@ -193,11 +232,11 @@ msgstr ""
 "this via --extudpip <ip-address of your computer> and --extudp on and "
 "configure the ip-address of the node as destination."
 
-#: __main__.py:570 __main__.py:620
+#: __main__.py:640 __main__.py:690
 msgid "Über"
 msgstr "About"
 
-#: __main__.py:570
+#: __main__.py:640
 #, python-brace-format
 msgid ""
 "MeshCom Client\n"
@@ -208,54 +247,57 @@ msgstr ""
 "Version {__version__}\n"
 "Developed by DG9VH"
 
-#: __main__.py:601
+#: __main__.py:671
 msgid "Beenden"
 msgstr "Exit"
 
-#: __main__.py:602
+#: __main__.py:672
 msgid "Datei"
 msgstr "File"
 
-#: __main__.py:606
+#: __main__.py:676
 msgid "Eigenes Rufzeichen"
 msgstr "Own Callsign"
 
-#: __main__.py:607
+#: __main__.py:677
 msgid "Watchlist"
 msgstr "Watchlist"
 
-#: __main__.py:608
-msgid "Lautstärke konfigurieren"
-msgstr "Configure Volume"
+#: __main__.py:678
+msgid "Audioeinstellungen"
+msgstr "Audio-Settings"
 
-#: __main__.py:611
+#: __main__.py:681
 msgid "Sprache"
 msgstr "Language"
 
-#: __main__.py:629
+#: __main__.py:699
 msgid "Nachricht:"
 msgstr "Message:"
 
-#: __main__.py:637
+#: __main__.py:707
 msgid "Zeichen übrig:"
 msgstr "Characters left:"
 
-#: __main__.py:646
+#: __main__.py:716
 msgid "Senden"
 msgstr "Send"
 
-#: __main__.py:649
+#: __main__.py:719
 msgid "Letzte Uhrzeit vom Netz (UTC):"
 msgstr "Last timestamp (in UTC) from network:"
 
-#: __main__.py:667
+#: __main__.py:737
 msgid "Hinweis"
 msgstr "Notice"
 
-#: __main__.py:667
+#: __main__.py:737
 msgid "Bitte ein Rufzeichen auswählen!"
 msgstr "Please select a callsign!"
 
-#: __main__.py:671
+#: __main__.py:741
 msgid "bisherigen Chat öffnen"
 msgstr "reopen chat"
+
+#~ msgid "Lautstärke konfigurieren"
+#~ msgstr "Configure Volume"
