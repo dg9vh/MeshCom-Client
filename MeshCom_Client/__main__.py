@@ -365,6 +365,7 @@ def display_message(message):
     msg_text = msg_text.replace('"',"'")
     message_id = message.get("msg_id", '')
     msg_tag = ""
+    confirmed = False  # Standardmäßig nicht bestätigt
     
     if dst_call == MYCALL:
         dst_call = src_call
@@ -376,10 +377,11 @@ def display_message(message):
                 msg_text = msg_text[msg_text.find("ack"):]
                 if msg_text[0:3] == "ack" and len(msg_text) == 6:
                     msg_tag = msg_text [-3:]
+                    confirmed = True  # Nachricht ist bestätigt
                     if dst_call.find(',') > 0:
                         dst_call = dst_call[:dst_call.find(',')]
                     tab_frames[dst_call].tag_config(msg_tag, foreground="green")  # Ändere die Farbe
-                    #tab_frames[dst_call].insert(msg_tag + " wordend", " ✓")  # Häkchen anfügen
+                    update_message(dst_call, msg_tag)
                     return
             
     if src_call == MYCALL and msg_text[-4] == "{" and not (isinstance(dst_call, int) or dst_call =="*"):
@@ -420,13 +422,9 @@ def display_message(message):
     tab_frames[dst_call].config(state=tk.DISABLED)
     tab_frames[dst_call].yview(tk.END)
     
-    add_message(dst_call, display_text)
+    add_message(dst_call, display_text, msg_tag, confirmed)
     
     callsign = extract_callsign(src_call)
-    print(f"Callsign: {callsign}")
-    print(f"src_call: {src_call}")
-    print(f"MYCALL: {MYCALL}")
-    print(MYCALL)
     if callsign in watchlist:
         print(_("ALERT: {callsign} erkannt!").format(callsign=callsign))
         play_sound_with_volume(CALLSIGN_ALERT, volume)
@@ -443,10 +441,25 @@ def display_message(message):
     received_ids.append(message_id)
 
 
-def add_message(call, message):
+def add_message(call, message, msg_tag, confirmed=False):
+    message_data = {
+        "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        "message": message.strip(),
+        "msg_tag": msg_tag,
+        "confirmed": confirmed
+    }
+    
     if call not in chat_storage:
         chat_storage[call] = []
-    chat_storage[call].append(message)
+    chat_storage[call].append(message_data)
+    save_chatlog(chat_storage)  # Speichert die Chats direkt
+    
+    
+def update_message(call, msg_tag):
+    for entry in chat_storage[call]:
+        if entry.get("msg_tag") == msg_tag:
+            entry["confirmed"] = True
+        
     save_chatlog(chat_storage)  # Speichert die Chats direkt
 
 
@@ -522,11 +535,27 @@ def create_tab(dst_call):
     if dst_call in chat_storage:
         print(_("Chat-Historie wiederherstellen"))
         for msg in chat_storage[dst_call]:
-            tab_frames[dst_call].config(state=tk.NORMAL)
-            tab_frames[dst_call].insert(tk.END, msg) # Chatverlauf in das Text-Widget einfügen
-            tab_frames[dst_call].config(state=tk.DISABLED)
-            tab_frames[dst_call].yview(tk.END)
+            confirmed = False
+            try:
+                if msg['confirmed']:
+                    confirmed = msg['confirmed']
+                msg_text = msg['message']
+                msg_tag = msg_text
+                start_index = tab_frames[dst_call].index("end-1c linestart")
+                tab_frames[dst_call].config(state=tk.NORMAL)
+                tab_frames[dst_call].insert(tk.END, msg_text + "\n") # Chatverlauf in das Text-Widget einfügen
+                tab_frames[dst_call].tag_add(msg_tag, start_index, f"{start_index} lineend")
 
+                if confirmed:
+                    tab_frames[dst_call].tag_config(msg_tag, foreground="green")  # Ändere die Farbe               
+                tab_frames[dst_call].config(state=tk.DISABLED)
+                tab_frames[dst_call].yview(tk.END)
+            except:
+                # Altes Chatlog-Format
+                tab_frames[dst_call].config(state=tk.NORMAL)
+                tab_frames[dst_call].insert(tk.END, msg) # Chatverlauf in das Text-Widget einfügen
+                tab_frames[dst_call].config(state=tk.DISABLED)
+                tab_frames[dst_call].yview(tk.END)
 
 def close_tab(dst_call, tab_frame):
     global chat_storage
@@ -581,7 +610,6 @@ def set_language(lang):
     global language
     language = lang
     save_settings()
-    print (language)
     messagebox.showinfo(_("Sprache geändert"), _("Die Sprache wurde geändert.\nBitte starten Sie das Programm neu."))
 
 
