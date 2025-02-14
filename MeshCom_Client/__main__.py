@@ -11,13 +11,37 @@ from tkinter import ttk, simpledialog, messagebox, filedialog
 import pygame
 import collections
 import gettext
-
 from importlib.metadata import version, PackageNotFoundError
+import sys
+import tomllib  # Falls Python < 3.11, dann: import toml
+from pathlib import Path
 
-try:
-    __version__ = version("MeshCom-Client")
-except PackageNotFoundError:
-    __version__ = "unknown"
+def get_version():
+    """Liest die Version aus pyproject.toml"""
+
+    # Prüfen, ob Programm gebündelt ist (PyInstaller)
+    if getattr(sys, 'frozen', False):
+        base_path = Path(sys._MEIPASS)  # Temp-Verzeichnis von PyInstaller
+    else:
+        base_path = Path(__file__).parent.parent  # Standard-Pfad im normalen Python-Lauf
+    
+    toml_path = base_path / "pyproject.toml"
+
+    if toml_path.exists():
+        with toml_path.open("rb") as f:
+            config = tomllib.load(f)
+        return config.get("project", {}).get("version", "0.1.0")  # <== Hier geändert!
+    
+    return "unknown"  # Standardwert, falls Datei nicht gefunden wird
+
+__version__ = get_version()
+print(f"Programmversion: {__version__}")
+
+if __version__ == "unknown":
+    try:
+        __version__ = version("MeshCom-Client")
+    except PackageNotFoundError:
+        __version__ = "unknown"
 
 print(f"MeshCom-Client Version: {__version__}")
 
