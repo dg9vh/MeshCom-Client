@@ -8,9 +8,7 @@ import json
 import threading
 import tkinter as tk
 from tkinter import ttk, simpledialog, messagebox, filedialog
-import simpleaudio as sa
-import wave
-import numpy as np
+import pygame
 import collections
 import gettext
 
@@ -315,27 +313,14 @@ def play_sound_with_volume(file_path, volume=1.0):
     :param volume: Lautstärke (zwischen 0.0 und 1.0).
     """
     try:
-        # Pfad zur Datei in einen String umwandeln
-        file_path_str = str(Path(__file__).parent / "sounds" / file_path)
+        pygame.mixer.init()
+        sound = pygame.mixer.Sound(file_path)
+        sound.set_volume(volume)
+        sound.play()
         
-        # Öffne die WAV-Datei
-        with wave.open(file_path_str, "rb") as wav_file:
-            # Lese die WAV-Datei
-            frames = wav_file.readframes(wav_file.getnframes())
-            sample_width = wav_file.getsampwidth()
-            num_channels = wav_file.getnchannels()
-            frame_rate = wav_file.getframerate()
-
-        # Konvertiere Frames in ein numpy-Array
-        audio_data = np.frombuffer(frames, dtype=np.int16)
-
-        # Passe die Lautstärke an
-        audio_data = (audio_data * volume).astype(np.int16)
-
-        # Erstelle eine neue WaveObject-Instanz
-        wave_obj = sa.WaveObject(audio_data.tobytes(), num_channels, sample_width, frame_rate)
-        play_obj = wave_obj.play()
-        play_obj.wait_done()  # Warten, bis der Ton fertig abgespielt ist
+        while pygame.mixer.get_busy():
+            pygame.time.delay(100)
+            
     except Exception as e:
         print(_("Fehler beim Abspielen der Sounddatei: {e}").format(e=e))
         
