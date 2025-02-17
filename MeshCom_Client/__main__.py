@@ -238,12 +238,17 @@ class WatchlistDialog(tk.Toplevel):
 
 def load_settings():
     """Lädt Einstellungen aus der INI-Datei."""
-    global DESTINATION_IP, MYCALL, volume, language, watchlist, NEW_MESSAGE, CALLSIGN_ALERT, OWN_CALLSIGN
+    global DESTINATION_IP, MYCALL, volume, language, watchlist, NEW_MESSAGE, CALLSIGN_ALERT, OWN_CALLSIGN, SEND_DELAY
     if os.path.exists(CONFIG_FILE):
         config.read(CONFIG_FILE)
         DESTINATION_IP = config.get("Settings", "DestinationIP", fallback=DESTINATION_IP)
         MYCALL = config.get("Settings", "MyCall", fallback=MYCALL)
         volume = config.getfloat("Settings", "Volume", fallback=0.5)
+        SEND_DELAY = config.getint("Settings", "SendDelay", fallback=40)
+        if SEND_DELAY < 10:
+            SEND_DELAY = 10
+        if SEND_DELAY > 40:
+            SEND_DELAY = 40
         language = config.get("GUI", "Language", fallback="de")
         watchlist = set(config.get("watchlist", "callsigns", fallback="").split(","))
         
@@ -261,6 +266,7 @@ def save_settings():
         "DestinationIP": DESTINATION_IP,
         "MYCALL": MYCALL,
         "Volume": volume,
+        "SendDelay": SEND_DELAY,
     }
     config["Audio"] = {
         "new_message": NEW_MESSAGE,
@@ -478,22 +484,18 @@ def update_message(call, msg_tag):
 
 
 def update_timer():
-    #global timer_label
     remaining_time = max(0, int(SEND_DELAY - (time.time() - last_sent_time)))
-    timer_label.config(text=f"{remaining_time}s")
+    
     if remaining_time > 0:
+        timer_label.config(text=f"{remaining_time}s")
         root.after(1000, update_timer)  # Aktualisiert jede Sekunde
+    else:
+        timer_label.config(text="Bereit zum Senden")
+        send_button.config(state=tk.NORMAL)  # Button wieder aktivieren
 
 
 def send_message(event=None):
     global last_sent_time
-    current_time = time.time()
-    
-    if current_time - last_sent_time < SEND_DELAY:
-        return  
-    
-    last_sent_time = current_time
-    update_timer()  # Countdown aktualisieren
         
     msg_text = message_entry.get()
     msg_text = msg_text.replace('"',"'")
@@ -503,6 +505,16 @@ def send_message(event=None):
     if not msg_text.strip():
         return
 
+
+    current_time = time.time()
+    
+    if current_time - last_sent_time < SEND_DELAY:
+        return  
+    
+    last_sent_time = current_time
+    send_button.config(state=tk.DISABLED)  # Button deaktivieren
+    update_timer()  # Countdown aktualisieren
+    
     message = {
         "type": "msg",
         "dst": dst_call,
@@ -636,6 +648,24 @@ def configure_mycall():
         messagebox.showinfo(_("Einstellung gespeichert"), _("Neues Rufzeichen: {MYCALL}").format(MYCALL=MYCALL))
 
 
+def configure_senddelay():
+    """Dialog zur Konfiguration der Wartezeit."""
+    global SEND_DELAY
+    new_send_delay = int(simpledialog.askstring(_("Wartezeit konfigurieren"), _("Geben Sie die neue Wartezeit in Sekundn ein (10 ... 40):"), initialvalue=SEND_DELAY))
+    if new_send_delay < 10:
+        messagebox.showinfo(_("Einstellung korrigieren"), _("Neue Wartezeit: {new_send_delay} ist zu kurz. Bitte mindestens 10 eingeben!").format(new_send_delay=new_send_delay))
+        configure_senddelay()
+        return
+    if new_send_delay > 40:
+        messagebox.showinfo(_("Einstellung korrigieren"), _("Neue Wartezeit: {new_send_delay} ist zu lang. Bitte maximal 40 eingeben!").format(new_send_delay=new_send_delay))
+        configure_senddelay()
+        return
+    if new_send_delay:
+        SEND_DELAY = new_send_delay
+        save_settings()
+        messagebox.showinfo(_("Einstellung gespeichert"), _("Neue Wartezeit: {SEND_DELAY}").format(SEND_DELAY=SEND_DELAY))
+
+
 def set_language(lang):
     """Setzt die Sprache in der Config-Datei und gibt eine Meldung aus."""
     global language
@@ -704,7 +734,7 @@ def on_closing():
     root.destroy()  # Schließt das Tkinter-Fenster
 
 def main():
-    global root, tab_control, chat_storage, dst_entry, message_entry, net_time, characters_left, timer_label
+    global root, tab_control, chat_storage, dst_entry, message_entry, net_time, characters_left, timer_label, send_button
     # GUI-Setup
     root = tk.Tk()
     root.title(f"MeshCom Client {__version__} by DG9VH")
@@ -733,6 +763,7 @@ def main():
     settings_menu = tk.Menu(menu_bar, tearoff=0)
     settings_menu.add_command(label=_("Node-IP konfigurieren"), command=configure_destination_ip)
     settings_menu.add_command(label=_("Eigenes Rufzeichen"), command=configure_mycall)
+    settings_menu.add_command(label=_("Wartezeit"), command=configure_senddelay)
     settings_menu.add_command(label=_("Watchlist"), command=open_watchlist_dialog)
     settings_menu.add_command(label=_("Audioeinstellungen"), command=open_settings_dialog)
     # Untermenü „Sprache“ hinzufügen
