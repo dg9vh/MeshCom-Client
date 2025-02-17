@@ -759,28 +759,28 @@ def main():
 
     vcmd = root.register(validate_length)  # Validation-Command registrieren
     message_entry = tk.Entry(input_frame, width=40, validate="key", validatecommand=(vcmd, "%P"))
-    message_entry.grid(row=0, column=1, padx=5, pady=5)
+    message_entry.grid(row=0, column=1, columnspan=3, padx=5, pady=5)
     message_entry.bind("<Return>", send_message) 
     
     tk.Label(input_frame, text=_("Wartezeit:")).grid(row=1, column=0, padx=5, pady=5, sticky="e")
     timer_label = tk.Label(input_frame, text="0s")
     timer_label.grid(row=1, column=1, padx=5, pady=5, sticky="w")
     
-    tk.Label(input_frame, text=_("Zeichen übrig:")).grid(row=2, column=0, padx=5, pady=5, sticky="e")
+    tk.Label(input_frame, text=_("Zeichen übrig:")).grid(row=1, column=2, padx=5, pady=5, sticky="e")
     characters_left = tk.Label(input_frame, text="149")
-    characters_left.grid(row=2, column=1, padx=5, pady=5, sticky="w")
+    characters_left.grid(row=1, column=3, padx=5, pady=5, sticky="w")
 
-    tk.Label(input_frame, text=_("Ziel:")).grid(row=3, column=0, padx=5, pady=5, sticky="e")
+    tk.Label(input_frame, text=_("Ziel:")).grid(row=2, column=0, padx=5, pady=5, sticky="e")
     dst_entry = tk.Entry(input_frame, width=20)
     dst_entry.insert(0, DEFAULT_DST)
-    dst_entry.grid(row=3, column=1, padx=5, pady=5, sticky="w")
+    dst_entry.grid(row=2, column=1, columnspan=3, padx=5, pady=5, sticky="w")
 
     send_button = tk.Button(input_frame, text=_("Senden"), command=send_message)
-    send_button.grid(row=0, column=2, rowspan=2, padx=5, pady=5, sticky="ns")
+    send_button.grid(row=0, column=4, rowspan=2, padx=5, pady=5, sticky="ns")
 
-    tk.Label(input_frame, text=_("Letzte Uhrzeit vom Netz (UTC):")).grid(row=0, column=3, padx=5, pady=5, sticky="w")
+    tk.Label(input_frame, text=_("Letzte Uhrzeit vom Netz (UTC):")).grid(row=0, column=5, padx=5, pady=5, sticky="w")
     net_time = tk.Entry(input_frame, width=25)
-    net_time.grid(row=1, column=3, padx=5, pady=5, sticky="w")
+    net_time.grid(row=1, column=5, padx=5, pady=5, sticky="w")
     net_time.config(state="disabled")
 
     # Fülle die Listbox mit den Rufzeichen
@@ -789,7 +789,7 @@ def main():
     # Erstelle Combobox
     selected_rufzeichen = tk.StringVar()
     combobox = ttk.Combobox(input_frame, textvariable=selected_rufzeichen, values=rufzeichen_liste, state="readonly")
-    combobox.grid(row=2, column=3, padx=5, pady=5, sticky="w")
+    combobox.grid(row=2, column=5, padx=5, pady=5, sticky="w")
 
     def on_open_chat():
         selected_value = selected_rufzeichen.get()
@@ -800,7 +800,7 @@ def main():
 
 
     # Button zum Öffnen des Chats
-    open_button = tk.Button(input_frame, text=_("bisherigen Chat öffnen"), command=on_open_chat).grid(row=2, column=4, padx=5, pady=5, sticky="w")
+    open_button = tk.Button(input_frame, text=_("bisherigen Chat öffnen"), command=on_open_chat).grid(row=2, column=6, padx=5, pady=5, sticky="w")
         
         
 
