@@ -15,6 +15,8 @@ from importlib.metadata import version, PackageNotFoundError
 import sys
 import tomllib  # Falls Python < 3.11, dann: import toml
 from pathlib import Path
+import time
+
 
 def get_version():
     """Liest die Version aus pyproject.toml"""
@@ -45,6 +47,9 @@ if __version__ == "unknown":
 
 print(f"MeshCom-Client Version: {__version__}")
 
+
+last_sent_time = 0  # Speichert die Zeit der letzten Nachricht
+SEND_DELAY = 40  # Wartezeit zum Senden neuer Nachrichten in Sekunden
 
 # Wir speichern die letzten 20 IDs in einer deque
 received_ids = collections.deque(maxlen=5)  # maxlen sorgt dafür, dass nur die letzten 5 IDs gespeichert werden
@@ -472,7 +477,24 @@ def update_message(call, msg_tag):
     save_chatlog(chat_storage)  # Speichert die Chats direkt
 
 
+def update_timer():
+    #global timer_label
+    remaining_time = max(0, int(SEND_DELAY - (time.time() - last_sent_time)))
+    timer_label.config(text=f"{remaining_time}s")
+    if remaining_time > 0:
+        root.after(1000, update_timer)  # Aktualisiert jede Sekunde
+
+
 def send_message(event=None):
+    global last_sent_time
+    current_time = time.time()
+    
+    if current_time - last_sent_time < SEND_DELAY:
+        return  
+    
+    last_sent_time = current_time
+    update_timer()  # Countdown aktualisieren
+        
     msg_text = message_entry.get()
     msg_text = msg_text.replace('"',"'")
     
@@ -682,7 +704,7 @@ def on_closing():
     root.destroy()  # Schließt das Tkinter-Fenster
 
 def main():
-    global root, tab_control, chat_storage, dst_entry, message_entry, net_time, characters_left
+    global root, tab_control, chat_storage, dst_entry, message_entry, net_time, characters_left, timer_label
     # GUI-Setup
     root = tk.Tk()
     root.title(f"MeshCom Client {__version__} by DG9VH")
@@ -740,15 +762,18 @@ def main():
     message_entry.grid(row=0, column=1, padx=5, pady=5)
     message_entry.bind("<Return>", send_message) 
     
+    tk.Label(input_frame, text=_("Wartezeit:")).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+    timer_label = tk.Label(input_frame, text="0s")
+    timer_label.grid(row=1, column=1, padx=5, pady=5, sticky="w")
     
-    tk.Label(input_frame, text=_("Zeichen übrig:")).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+    tk.Label(input_frame, text=_("Zeichen übrig:")).grid(row=2, column=0, padx=5, pady=5, sticky="e")
     characters_left = tk.Label(input_frame, text="149")
-    characters_left.grid(row=1, column=1, padx=5, pady=5, sticky="w")
+    characters_left.grid(row=2, column=1, padx=5, pady=5, sticky="w")
 
-    tk.Label(input_frame, text=_("Ziel:")).grid(row=2, column=0, padx=5, pady=5, sticky="e")
+    tk.Label(input_frame, text=_("Ziel:")).grid(row=3, column=0, padx=5, pady=5, sticky="e")
     dst_entry = tk.Entry(input_frame, width=20)
     dst_entry.insert(0, DEFAULT_DST)
-    dst_entry.grid(row=2, column=1, padx=5, pady=5, sticky="w")
+    dst_entry.grid(row=3, column=1, padx=5, pady=5, sticky="w")
 
     send_button = tk.Button(input_frame, text=_("Senden"), command=send_message)
     send_button.grid(row=0, column=2, rowspan=2, padx=5, pady=5, sticky="ns")
