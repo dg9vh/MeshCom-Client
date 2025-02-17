@@ -1,6 +1,11 @@
+/build
 /dist
 /MeshCom_Client.egg-info
 /MeshCom_Client/settings.ini
 /MeshCom_Client/chatlog.json
+/MeshCom_Client/build
+/MeshCom_Client/dist
+/MeshCom_Client/win-build.sh
+/MeshCom_Client/MeshCom-Client.spec
 rebuild.sh
 
