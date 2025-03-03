@@ -505,7 +505,7 @@ def update_timer():
         timer_label.config(text=f"{remaining_time}s")
         root.after(1000, update_timer)  # Aktualisiert jede Sekunde
     else:
-        timer_label.config(text="Bereit zum Senden")
+        timer_label.config(text=_("Bereit zum Senden"))
         send_button.config(state=tk.NORMAL)  # Button wieder aktivieren
 
 
@@ -813,7 +813,7 @@ def main():
     message_entry.bind("<Return>", send_message) 
     
     tk.Label(input_frame, text=_("Wartezeit:")).grid(row=1, column=0, padx=5, pady=5, sticky="e")
-    timer_label = tk.Label(input_frame, text="0s")
+    timer_label = tk.Label(input_frame, text=_("Bereit zum Senden"))
     timer_label.grid(row=1, column=1, padx=5, pady=5, sticky="w")
     
     tk.Label(input_frame, text=_("Zeichen übrig:")).grid(row=1, column=2, padx=5, pady=5, sticky="e")
