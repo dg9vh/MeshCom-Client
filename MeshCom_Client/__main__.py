@@ -466,7 +466,12 @@ def display_message(message):
         play_sound_with_volume(NEW_MESSAGE, volume)
 
     # Tab hervorheben
-    highlight_tab(dst_call)
+    if src_call != MYCALL:
+        highlight_tab(dst_call)
+        
+    if src_call == MYCALL:
+        reset_tab_highlight(None)
+
     # Nach der Verarbeitung die ID zur deque hinzufügen
     received_ids.append(message_id)
 
