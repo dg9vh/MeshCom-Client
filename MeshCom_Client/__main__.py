@@ -80,7 +80,9 @@ OWN_CALLSIGN = Path(__file__).parent / "sounds" / "mycall.wav"
 
 # Dictionary zur Verwaltung der Tabs
 tab_frames = {}
+open_tabs = set()
 tab_highlighted = set()  # Set für Tabs, die hervorgehoben werden sollen
+
 
 #Set für Watchlist
 watchlist = set()
@@ -238,7 +240,7 @@ class WatchlistDialog(tk.Toplevel):
 
 def load_settings():
     """Lädt Einstellungen aus der INI-Datei."""
-    global DESTINATION_IP, MYCALL, volume, language, watchlist, NEW_MESSAGE, CALLSIGN_ALERT, OWN_CALLSIGN, SEND_DELAY
+    global DESTINATION_IP, MYCALL, volume, language, watchlist, NEW_MESSAGE, CALLSIGN_ALERT, OWN_CALLSIGN, SEND_DELAY, open_tabs
     if os.path.exists(CONFIG_FILE):
         config.read(CONFIG_FILE)
         DESTINATION_IP = config.get("Settings", "DestinationIP", fallback=DESTINATION_IP)
@@ -251,10 +253,17 @@ def load_settings():
             SEND_DELAY = 40
         language = config.get("GUI", "Language", fallback="de")
         watchlist = set(config.get("watchlist", "callsigns", fallback="").split(","))
+        open_tabs = sorted(set(config.get("tablist", "tabs", fallback="").split(",")))
         
         NEW_MESSAGE = config.get("Audio", "new_message", fallback=NEW_MESSAGE)
         CALLSIGN_ALERT = config.get("Audio", "callsign_alert", fallback=CALLSIGN_ALERT)
         OWN_CALLSIGN = config.get("Audio", "own_callsign", fallback=OWN_CALLSIGN)
+
+
+def reopen_tabs():
+    global open_tabs
+    for tab in open_tabs:
+        create_tab(tab)
 
 
 def save_settings():
@@ -274,6 +283,7 @@ def save_settings():
         "own_callsign": OWN_CALLSIGN,
     }
     config["watchlist"] = {"callsigns": ",".join(watchlist)}
+    config["tablist"] = {"tabs": ",".join(tab_frames)}
     
     with open(CONFIG_FILE, "w") as configfile:
         config.write(configfile)
@@ -539,7 +549,7 @@ def validate_length(new_text):
     chars_left = MAX_MESSAGE_LENGTH - len(new_text)
     characters_left.config(text = str(chars_left))
     return len(new_text) <= MAX_MESSAGE_LENGTH
-
+    
 
 def create_tab(dst_call):
     global text_areas
@@ -599,6 +609,7 @@ def create_tab(dst_call):
                 tab_frames[dst_call].insert(tk.END, msg) # Chatverlauf in das Text-Widget einfügen
                 tab_frames[dst_call].config(state=tk.DISABLED)
                 tab_frames[dst_call].yview(tk.END)
+    save_settings()
 
 def close_tab(dst_call, tab_frame):
     global chat_storage
@@ -606,6 +617,7 @@ def close_tab(dst_call, tab_frame):
     if dst_call in tab_frames:
         del tab_frames[dst_call]
     tab_control.forget(tab_frame)
+    save_settings()
 
 
 def highlight_tab(dst_call):
@@ -838,6 +850,8 @@ def main():
     tab_control.pack(expand=1, fill="both", padx=10, pady=10)
 
     threading.Thread(target=receive_messages, daemon=True).start()
+    
+    reopen_tabs()
 
     root.mainloop()
 
