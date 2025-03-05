@@ -746,7 +746,7 @@ def show_help():
 
 def show_about():
     """Über-Dialog anzeigen."""
-    global __version__
+    #global __version__
     messagebox.showinfo(_("Über"), _("MeshCom Client\nVersion {__version__}\nEntwickelt von DG9VH").format(__version__=__version__))
 
 
