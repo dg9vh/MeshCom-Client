@@ -9,13 +9,13 @@ import json
 import threading
 import tkinter as tk
 from tkinter import ttk, simpledialog, messagebox, filedialog
-import pygame
+import time
+import tomllib  # Falls Python < 3.11, dann: import toml
+import sys
+from importlib.metadata import version, PackageNotFoundError
 import collections
 import gettext
-from importlib.metadata import version, PackageNotFoundError
-import sys
-import tomllib  # Falls Python < 3.11, dann: import toml
-import time
+import pygame
 
 
 def get_version():
@@ -300,7 +300,7 @@ def open_watchlist_dialog():
         global watchlist
         watchlist = new_watchlist
         save_settings()
-        print(_(f"Watchlist gespeichert"))
+        print(_("Watchlist gespeichert"))
 
     WatchlistDialog(root, watchlist, save_watchlist)
 
@@ -314,7 +314,7 @@ def save_chatlog(chat_data):
 
 # Funktion zum Löschen des Chatverlaufs
 def delete_chat(rufzeichen, text_widget, tab_control, tab):
-    global chat_storage
+    #global chat_storage
 
     if rufzeichen in chat_storage:
         # Bestätigung einholen
@@ -544,14 +544,13 @@ def send_message(event=None):
 
 def validate_length(new_text):
     """Validiert die Länge der Eingabe."""
-    global characters_left
     chars_left = MAX_MESSAGE_LENGTH - len(new_text)
     characters_left.config(text = str(chars_left))
     return len(new_text) <= MAX_MESSAGE_LENGTH
 
 
 def create_tab(dst_call):
-    global text_areas
+    #global text_areas
     tab_frame = ttk.Frame(tab_control)
     tab_control.add(tab_frame, text=dst_call)
 
@@ -559,7 +558,7 @@ def create_tab(dst_call):
     tab_header = tk.Frame(tab_frame)
     tab_header.pack(side=tk.TOP, fill="x")
 
-    title_label = tk.Label(tab_header, text=_(f"Ziel:") + " " + dst_call, anchor="w")
+    title_label = tk.Label(tab_header, text=_("Ziel:") + " " + dst_call, anchor="w")
     title_label.bind("<Button-1>", reset_tab_highlight)
     title_label.pack(side=tk.LEFT, padx=5)
 
@@ -611,7 +610,7 @@ def create_tab(dst_call):
 
 
 def close_tab(dst_call, tab_frame):
-    global chat_storage
+    #global chat_storage
     save_chatlog(chat_storage)
     if dst_call in tab_frames:
         del tab_frames[dst_call]
@@ -702,7 +701,7 @@ def load_rufzeichen():
 
 def on_message_click(event, dst_call):
     """Wird aufgerufen, wenn eine Nachricht in der TextArea angeklickt wird"""
-    global message_entry
+    #global message_entry
     try:
         text_widget = text_areas.get(dst_call)
         if not text_widget:
@@ -746,8 +745,8 @@ def show_help():
 
 
 def show_about():
-    global __version__
     """Über-Dialog anzeigen."""
+    global __version__
     messagebox.showinfo(_("Über"), _("MeshCom Client\nVersion {__version__}\nEntwickelt von DG9VH").format(__version__=__version__))
 
 
@@ -853,7 +852,7 @@ def main():
             messagebox.showwarning(_("Hinweis"), _("Bitte ein Rufzeichen auswählen!"))
 
     # Button zum Öffnen des Chats
-    open_button = tk.Button(input_frame, text=_("bisherigen Chat öffnen"), command=on_open_chat).grid(row=2, column=6, padx=5, pady=5, sticky="w")
+    tk.Button(input_frame, text=_("bisherigen Chat öffnen"), command=on_open_chat).grid(row=2, column=6, padx=5, pady=5, sticky="w")
 
     tab_control.pack(expand=1, fill="both", padx=10, pady=10)
 
