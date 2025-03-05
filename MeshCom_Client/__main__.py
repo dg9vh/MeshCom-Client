@@ -26,14 +26,14 @@ def get_version():
         base_path = Path(sys._MEIPASS)  # Temp-Verzeichnis von PyInstaller
     else:
         base_path = Path(__file__).parent.parent  # Standard-Pfad im normalen Python-Lauf
-    
+
     toml_path = base_path / "pyproject.toml"
 
     if toml_path.exists():
         with toml_path.open("rb") as f:
             config = tomllib.load(f)
         return config.get("project", {}).get("version", "0.1.0")  # <== Hier geändert!
-    
+
     return "unknown"  # Standardwert, falls Datei nicht gefunden wird
 
 __version__ = get_version()
@@ -52,8 +52,8 @@ last_sent_time = 0  # Speichert die Zeit der letzten Nachricht
 SEND_DELAY = 40  # Wartezeit zum Senden neuer Nachrichten in Sekunden
 
 # Wir speichern die letzten 20 IDs in einer deque
-received_ids = collections.deque(maxlen=5)  # maxlen sorgt dafür, dass nur die letzten 5 IDs gespeichert werden
-
+received_ids = collections.deque(maxlen=5)  # maxlen sorgt dafür, dass nur die letzten 5 IDs 
+                                            # gespeichert werden
 # Server-Konfiguration
 UDP_IP_ADDRESS = "0.0.0.0"
 UDP_PORT_NO = 1799
@@ -125,22 +125,18 @@ class SettingsDialog(tk.Toplevel):
         self.volume_slider.set(initial_volume)
         self.volume_slider.pack(pady=10)
 
-        #tk.Label(self, text=_("Neue Nachricht:")).pack(pady=10)        
         self.new_message_label = tk.Label(self, text = _("Neue Nachricht:") + " " + initial_new_message, width=200)
         self.new_message_label.pack(pady=10)
         ttk.Button(self, text=_("Datei wählen"), command = self.choose_new_message_file).pack(pady=10)
         
-        #tk.Label(self, text=_("Watchlist-Hinweis:")).pack(pady=10)
         self.callsign_alert_label = tk.Label(self, text = _("Watchlist-Hinweis:") + " " + initial_callsign_alert, width=200)
         self.callsign_alert_label.pack(pady=10)
         ttk.Button(self, text=_("Datei wählen"), command = self.choose_callsign_alert_file).pack(pady=10)
         
-        #tk.Label(self, text=_("Eigenes Rufzeichen-Hinweis:")).pack(pady=10)
         self.owncall_alert_label = tk.Label(self, text = _("Eigenes Rufzeichen-Hinweis:") + " " + initial_owncall_alert, width=200)
         self.owncall_alert_label.pack(pady=10)
         ttk.Button(self, text=_("Datei wählen"), command = self.choose_owncall_alert_file).pack(pady=10)
 
-        
         # Speichern-Button
         ttk.Button(self, text=_("Speichern"), command = self.save_settings).pack(pady=10)
 
@@ -149,7 +145,6 @@ class SettingsDialog(tk.Toplevel):
         global NEW_MESSAGE
         """Öffnet einen Datei-Dialog und setzt die Variable auf den ausgewählten Dateinamen."""
         NEW_MESSAGE = filedialog.askopenfilename(filetypes=[("WAV-Dateien", "*.wav")])
-        
         self.new_message_label.config(text = _("Neue Nachricht:") + " " + NEW_MESSAGE)
 
 
@@ -157,7 +152,6 @@ class SettingsDialog(tk.Toplevel):
         global CALLSIGN_ALERT
         """Öffnet einen Datei-Dialog und setzt die Variable auf den ausgewählten Dateinamen."""
         CALLSIGN_ALERT = filedialog.askopenfilename(filetypes=[("WAV-Dateien", "*.wav")])
-        
         self.callsign_alert_label.config(text = _("Watchlist-Hinweis:") + " " + CALLSIGN_ALERT)
 
 
@@ -165,7 +159,6 @@ class SettingsDialog(tk.Toplevel):
         global OWN_CALLSIGN
         """Öffnet einen Datei-Dialog und setzt die Variable auf den ausgewählten Dateinamen."""
         OWN_CALLSIGN = filedialog.askopenfilename(filetypes=[("WAV-Dateien", "*.wav")])
-        
         self.owncall_alert_label.config(text = _("Eigenes Rufzeichen-Hinweis:") + " " + OWN_CALLSIGN)
 
 
@@ -174,7 +167,7 @@ class SettingsDialog(tk.Toplevel):
         volume = self.volume_slider.get()
         self.save_callback(volume, NEW_MESSAGE, CALLSIGN_ALERT, OWN_CALLSIGN)
         self.destroy()
-        
+
 
 class WatchlistDialog(tk.Toplevel):
     global watchlist
@@ -208,8 +201,8 @@ class WatchlistDialog(tk.Toplevel):
     def save_watchlist(self):
         """Speichert die aktuelle Watchlist in die Settings"""
         save_settings();
-        
-        
+
+
     def add_callsign(self):
         """Fügt ein neues Rufzeichen zur Watchlist hinzu."""
         callsign = self.entry_callsign.get().strip().upper()
@@ -230,8 +223,8 @@ class WatchlistDialog(tk.Toplevel):
             watchlist.remove(callsign)
             self.listbox.delete(selected[0])
             self.save_watchlist()
-            
-        
+
+
     def save_settings(self):
         # Watchlist speichern und zurückgeben
         self.save_callback(watchlist)
@@ -254,7 +247,7 @@ def load_settings():
         language = config.get("GUI", "Language", fallback="de")
         watchlist = set(config.get("watchlist", "callsigns", fallback="").split(","))
         open_tabs = sorted(set(config.get("tablist", "tabs", fallback="").split(",")))
-        
+
         NEW_MESSAGE = config.get("Audio", "new_message", fallback=NEW_MESSAGE)
         CALLSIGN_ALERT = config.get("Audio", "callsign_alert", fallback=CALLSIGN_ALERT)
         OWN_CALLSIGN = config.get("Audio", "own_callsign", fallback=OWN_CALLSIGN)
@@ -284,7 +277,7 @@ def save_settings():
     }
     config["watchlist"] = {"callsigns": ",".join(watchlist)}
     config["tablist"] = {"tabs": ",".join(tab_frames)}
-    
+
     with open(CONFIG_FILE, "w") as configfile:
         config.write(configfile)
 
@@ -313,7 +306,7 @@ def open_watchlist_dialog():
         print(_(f"Watchlist gespeichert"))
 
     WatchlistDialog(root, watchlist, save_watchlist)
-    
+
 
 def save_chatlog(chat_data):
     with open(CHATLOG_FILE, "w") as f:
@@ -362,13 +355,13 @@ def play_sound_with_volume(file_path, volume=1.0):
         sound = pygame.mixer.Sound(file_path)
         sound.set_volume(volume)
         sound.play()
-        
+
         while pygame.mixer.get_busy():
             pygame.time.delay(100)
-            
+
     except Exception as e:
         print(_("Fehler beim Abspielen der Sounddatei: {e}").format(e=e))
-    
+
 
 def receive_messages():
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -380,7 +373,7 @@ def receive_messages():
             data, addr = server_sock.recvfrom(1024)
             decoded_data = data.decode('utf-8')
             print(_("Daten empfangen von {addr}: {decoded_data}").format(addr=addr, decoded_data=decoded_data))
-            
+
             #
             # Hier muss noch was gemacht werden, um "" in den Nachrichten richtig zu verarbeiten. Diese werden von MeshCom-Seite nicht korrekt codiert und liefern
             # invalide JSON-Daten... Beispiel: gesendet wurde: g "k"
@@ -395,19 +388,19 @@ def receive_messages():
 def display_message(message):
     src_call = message.get('src', 'Unknown')
     dst_call = message.get('dst', 'Unknown')
-            
+
     msg_text = message.get('msg', '')
     msg_text = msg_text.replace('"',"'")
     message_id = message.get("msg_id", '')
     msg_tag = ""
     confirmed = False  # Standardmäßig nicht bestätigt
-    
+
     if dst_call == MYCALL:
         dst_call = src_call
         if  msg_text[-4] == "{":
             msg_tag = msg_text[-3:]
             msg_text = msg_text[:-4]
-        
+
         if msg_text.find("ack") > 0:
                 msg_text = msg_text[msg_text.find("ack"):]
                 if msg_text[0:3] == "ack" and len(msg_text) == 6:
@@ -418,21 +411,21 @@ def display_message(message):
                     tab_frames[dst_call].tag_config(msg_tag, foreground="green")  # Ändere die Farbe
                     update_message(dst_call, msg_tag)
                     return
-            
+
     if src_call == MYCALL and msg_text[-4] == "{" and not (isinstance(dst_call, int) or dst_call =="*"):
         msg_tag = msg_text[-3:]
         msg_text = msg_text[:-4] 
-    
+
     if dst_call.find(',') > 0:
         dst_call = dst_call[:dst_call.find(',')]
 
     if message_id == '':
         return
-    
+
     if message_id in received_ids:
         print(_("Nachricht mit ID {message_id} bereits empfangen und verarbeitet.").format(message_id=message_id))
         return  # Nachricht wird ignoriert, da sie bereits verarbeitet wurde
-    
+
     if msg_text == '':
         return
 
@@ -442,7 +435,7 @@ def display_message(message):
         net_time.insert(0, msg_text[5:])
         net_time.config(state="disabled")
         return
-    
+
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     if dst_call not in tab_frames:
@@ -456,9 +449,9 @@ def display_message(message):
     tab_frames[dst_call].tag_config(start_index, foreground="black")
     tab_frames[dst_call].config(state=tk.DISABLED)
     tab_frames[dst_call].yview(tk.END)
-    
+
     add_message(dst_call, display_text, msg_tag, confirmed)
-    
+
     callsign = extract_callsign(src_call)
     if callsign in watchlist:
         print(_("ALERT: {callsign} erkannt!").format(callsign=callsign))
@@ -473,7 +466,7 @@ def display_message(message):
     # Tab hervorheben
     if src_call != MYCALL:
         highlight_tab(dst_call)
-        
+
     if src_call == MYCALL:
         reset_tab_highlight(None)
 
@@ -488,24 +481,24 @@ def add_message(call, message, msg_tag, confirmed=False):
         "msg_tag": msg_tag,
         "confirmed": confirmed
     }
-    
+
     if call not in chat_storage:
         chat_storage[call] = []
     chat_storage[call].append(message_data)
     save_chatlog(chat_storage)  # Speichert die Chats direkt
-    
-    
+
+
 def update_message(call, msg_tag):
     for entry in chat_storage[call]:
         if entry.get("msg_tag") == msg_tag:
             entry["confirmed"] = True
-        
+
     save_chatlog(chat_storage)  # Speichert die Chats direkt
 
 
 def update_timer():
     remaining_time = max(0, int(SEND_DELAY - (time.time() - last_sent_time)))
-    
+
     if remaining_time > 0:
         timer_label.config(text=f"{remaining_time}s")
         root.after(1000, update_timer)  # Aktualisiert jede Sekunde
@@ -516,25 +509,24 @@ def update_timer():
 
 def send_message(event=None):
     global last_sent_time
-        
+
     msg_text = message_entry.get()
     msg_text = msg_text.replace('"',"'")
-    
+
     dst_call = dst_entry.get() or DEFAULT_DST
 
     if not msg_text.strip():
         return
 
-
     current_time = time.time()
-    
+
     if current_time - last_sent_time < SEND_DELAY:
         return  
-    
+
     last_sent_time = current_time
     send_button.config(state=tk.DISABLED)  # Button deaktivieren
     update_timer()  # Countdown aktualisieren
-    
+
     message = {
         "type": "msg",
         "dst": dst_call,
@@ -559,7 +551,7 @@ def validate_length(new_text):
     chars_left = MAX_MESSAGE_LENGTH - len(new_text)
     characters_left.config(text = str(chars_left))
     return len(new_text) <= MAX_MESSAGE_LENGTH
-    
+
 
 def create_tab(dst_call):
     global text_areas
@@ -576,24 +568,23 @@ def create_tab(dst_call):
 
     close_button = tk.Button(tab_header, text="X", command=lambda: close_tab(dst_call, tab_frame), width=2)
     close_button.pack(side=tk.RIGHT, padx=5)
-    
+
     # Button zum Löschen des Chats
     delete_button = tk.Button(tab_header, text=_("Chat löschen"), command=lambda: delete_chat(dst_call, text_area, tab_control, tab_frame))
     delete_button.pack(side=tk.RIGHT, padx=5)
-
 
     # Textfeld
     text_area = tk.Text(tab_frame, wrap=tk.WORD, state=tk.DISABLED, height=20, width=60)
     text_area.bind("<ButtonRelease-1>", lambda event, call=dst_call: on_message_click(event, call))
     text_area.pack(side=tk.LEFT, expand=1, fill="both", padx=10, pady=10)
-    
+
     # Speichern des Widgets im Dictionary
     text_areas[dst_call] = text_area
 
     scrollbar = tk.Scrollbar(tab_frame, orient=tk.VERTICAL, command=text_area.yview)
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
     text_area.config(yscrollcommand=scrollbar.set)
-    
+
     tab_frames[dst_call] = text_area
     if dst_call in chat_storage:
         print(_("Chat-Historie wiederherstellen"))
@@ -620,6 +611,7 @@ def create_tab(dst_call):
                 tab_frames[dst_call].config(state=tk.DISABLED)
                 tab_frames[dst_call].yview(tk.END)
     save_settings()
+
 
 def close_tab(dst_call, tab_frame):
     global chat_storage
@@ -750,7 +742,7 @@ def on_message_click(event, dst_call):
     except Exception as e:
         print(f"Fehler beim Parsen der Nachricht: {e}")
 
-    
+
 def show_help():
     """Hilfe anzeigen."""
     messagebox.showinfo(_("Hilfe"), _("Dieses Programm ermöglicht den Empfang und das Senden von Nachrichten über das Meshcom-Netzwerk, indem via UDP eine Verbindung zum Node hergestellt wird. Zur Nutzung mit dem Node ist hier vorher auf dem Node mit --extudpip <ip-adresse des Rechners> sowie --extudp on die Datenübertragung zu aktivieren und über die Einstellungen hier die IP-Adresse des Nodes anzugeben."))
@@ -765,6 +757,7 @@ def show_about():
 def on_closing():
     save_chatlog(chat_storage)  # Speichert alle offenen Chats
     root.destroy()  # Schließt das Tkinter-Fenster
+
 
 def main():
     global root, tab_control, chat_storage, dst_entry, message_entry, net_time, characters_left, timer_label, send_button
@@ -825,11 +818,11 @@ def main():
     message_entry = tk.Entry(input_frame, width=40, validate="key", validatecommand=(vcmd, "%P"))
     message_entry.grid(row=0, column=1, columnspan=3, padx=5, pady=5)
     message_entry.bind("<Return>", send_message) 
-    
+
     tk.Label(input_frame, text=_("Wartezeit:")).grid(row=1, column=0, padx=5, pady=5, sticky="e")
     timer_label = tk.Label(input_frame, text=_("Bereit zum Senden"))
     timer_label.grid(row=1, column=1, padx=5, pady=5, sticky="w")
-    
+
     tk.Label(input_frame, text=_("Zeichen übrig:")).grid(row=1, column=2, padx=5, pady=5, sticky="e")
     characters_left = tk.Label(input_frame, text="149")
     characters_left.grid(row=1, column=3, padx=5, pady=5, sticky="w")
@@ -862,16 +855,13 @@ def main():
         else:
             messagebox.showwarning(_("Hinweis"), _("Bitte ein Rufzeichen auswählen!"))
 
-
     # Button zum Öffnen des Chats
     open_button = tk.Button(input_frame, text=_("bisherigen Chat öffnen"), command=on_open_chat).grid(row=2, column=6, padx=5, pady=5, sticky="w")
-        
-        
 
     tab_control.pack(expand=1, fill="both", padx=10, pady=10)
 
     threading.Thread(target=receive_messages, daemon=True).start()
-    
+
     reopen_tabs()
 
     root.mainloop()
