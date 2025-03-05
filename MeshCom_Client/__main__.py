@@ -15,7 +15,6 @@ import gettext
 from importlib.metadata import version, PackageNotFoundError
 import sys
 import tomllib  # Falls Python < 3.11, dann: import toml
-from pathlib import Path
 import time
 
 
@@ -32,8 +31,8 @@ def get_version():
 
     if toml_path.exists():
         with toml_path.open("rb") as f:
-            config = tomllib.load(f)
-        return config.get("project", {}).get("version", "0.1.0")  # <== Hier geändert!
+            toml_config = tomllib.load(f)
+        return toml_config.get("project", {}).get("version", "0.1.0")  # <== Hier geändert!
 
     return "unknown"  # Standardwert, falls Datei nicht gefunden wird
 
@@ -143,36 +142,35 @@ class SettingsDialog(tk.Toplevel):
 
 
     def choose_new_message_file(self):
-        global NEW_MESSAGE
         """Öffnet einen Datei-Dialog und setzt die Variable auf den ausgewählten Dateinamen."""
+        global NEW_MESSAGE
         NEW_MESSAGE = filedialog.askopenfilename(filetypes=[("WAV-Dateien", "*.wav")])
         self.new_message_label.config(text = _("Neue Nachricht:") + " " + NEW_MESSAGE)
 
 
     def choose_callsign_alert_file(self):
-        global CALLSIGN_ALERT
         """Öffnet einen Datei-Dialog und setzt die Variable auf den ausgewählten Dateinamen."""
+        global CALLSIGN_ALERT
         CALLSIGN_ALERT = filedialog.askopenfilename(filetypes=[("WAV-Dateien", "*.wav")])
         self.callsign_alert_label.config(text = _("Watchlist-Hinweis:") + " " + CALLSIGN_ALERT)
 
 
     def choose_owncall_alert_file(self):
-        global OWN_CALLSIGN
         """Öffnet einen Datei-Dialog und setzt die Variable auf den ausgewählten Dateinamen."""
+        global OWN_CALLSIGN
         OWN_CALLSIGN = filedialog.askopenfilename(filetypes=[("WAV-Dateien", "*.wav")])
         self.owncall_alert_label.config(text = _("Eigenes Rufzeichen-Hinweis:") + " " + OWN_CALLSIGN)
 
 
     def save_settings(self):
         # Lautstärke speichern und zurückgeben
-        volume = self.volume_slider.get()
-        self.save_callback(volume, NEW_MESSAGE, CALLSIGN_ALERT, OWN_CALLSIGN)
+        newvolume = self.volume_slider.get()
+        self.save_callback(newvolume, NEW_MESSAGE, CALLSIGN_ALERT, OWN_CALLSIGN)
         self.destroy()
 
 
 class WatchlistDialog(tk.Toplevel):
-    global watchlist
-    def __init__(self, master, initial_volume, save_callback):
+    def __init__(self, master, watchlist, save_callback):
         super().__init__(master)
         self.title(_("Einstellungen"))
         self.geometry("600x400")
