@@ -727,11 +727,20 @@ def on_message_click(event, dst_call):
         if len(parts) > 1:
             sender_info = parts[1].split(":")[0]  # Teil vor dem ersten Doppelpunkt nehmen
             sender_callsign = sender_info.split(",")[0]  # Erstes Rufzeichen extrahieren
-            
-            # Rufzeichen in die Eingabebox setzen
-            text = message_entry.get()
+
+            # Aktuellen Inhalt des Eingabefelds holen
+            current_text = message_entry.get()
+
+            # Prüfen, ob bereits ein Rufzeichen vorhanden ist
+            if ":" in current_text:
+                # Falls ja, nur das Rufzeichen ersetzen
+                current_text = current_text.split(":", 1)[1].strip()  # Text hinter dem ersten ":" behalten
+            else:
+                current_text = ""  # Falls kein ":" existiert, neuen Text setzen
+
+            # Neues Rufzeichen mit dem aktuellen Text setzen
             message_entry.delete(0, tk.END)
-            message_entry.insert(0, f"{sender_callsign}: {text}")
+            message_entry.insert(0, f"{sender_callsign}: {current_text}")
             message_entry.focus_set()
     except Exception as e:
         print(f"Fehler beim Parsen der Nachricht: {e}")
