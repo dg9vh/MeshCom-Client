@@ -1,3 +1,4 @@
+""" MeshCom_Client communicating with MeshCom-Nodes via UDP"""
 #!/usr/bin/python3
 import os
 import configparser
@@ -52,7 +53,7 @@ last_sent_time = 0  # Speichert die Zeit der letzten Nachricht
 SEND_DELAY = 40  # Wartezeit zum Senden neuer Nachrichten in Sekunden
 
 # Wir speichern die letzten 20 IDs in einer deque
-received_ids = collections.deque(maxlen=5)  # maxlen sorgt dafür, dass nur die letzten 5 IDs 
+received_ids = collections.deque(maxlen=5)  # maxlen sorgt dafür, dass nur die letzten 5 IDs
                                             # gespeichert werden
 # Server-Konfiguration
 UDP_IP_ADDRESS = "0.0.0.0"
@@ -128,11 +129,11 @@ class SettingsDialog(tk.Toplevel):
         self.new_message_label = tk.Label(self, text = _("Neue Nachricht:") + " " + initial_new_message, width=200)
         self.new_message_label.pack(pady=10)
         ttk.Button(self, text=_("Datei wählen"), command = self.choose_new_message_file).pack(pady=10)
-        
+
         self.callsign_alert_label = tk.Label(self, text = _("Watchlist-Hinweis:") + " " + initial_callsign_alert, width=200)
         self.callsign_alert_label.pack(pady=10)
         ttk.Button(self, text=_("Datei wählen"), command = self.choose_callsign_alert_file).pack(pady=10)
-        
+
         self.owncall_alert_label = tk.Label(self, text = _("Eigenes Rufzeichen-Hinweis:") + " " + initial_owncall_alert, width=200)
         self.owncall_alert_label.pack(pady=10)
         ttk.Button(self, text=_("Datei wählen"), command = self.choose_owncall_alert_file).pack(pady=10)
@@ -200,7 +201,7 @@ class WatchlistDialog(tk.Toplevel):
 
     def save_watchlist(self):
         """Speichert die aktuelle Watchlist in die Settings"""
-        save_settings();
+        save_settings()
 
 
     def add_callsign(self):
@@ -402,19 +403,19 @@ def display_message(message):
             msg_text = msg_text[:-4]
 
         if msg_text.find("ack") > 0:
-                msg_text = msg_text[msg_text.find("ack"):]
-                if msg_text[0:3] == "ack" and len(msg_text) == 6:
-                    msg_tag = msg_text [-3:]
-                    confirmed = True  # Nachricht ist bestätigt
-                    if dst_call.find(',') > 0:
-                        dst_call = dst_call[:dst_call.find(',')]
-                    tab_frames[dst_call].tag_config(msg_tag, foreground="green")  # Ändere die Farbe
-                    update_message(dst_call, msg_tag)
-                    return
+            msg_text = msg_text[msg_text.find("ack"):]
+            if msg_text[0:3] == "ack" and len(msg_text) == 6:
+                msg_tag = msg_text [-3:]
+                confirmed = True  # Nachricht ist bestätigt
+                if dst_call.find(',') > 0:
+                    dst_call = dst_call[:dst_call.find(',')]
+                tab_frames[dst_call].tag_config(msg_tag, foreground="green")  # Ändere die Farbe
+                update_message(dst_call, msg_tag)
+                return
 
     if src_call == MYCALL and msg_text[-4] == "{" and not (isinstance(dst_call, int) or dst_call =="*"):
         msg_tag = msg_text[-3:]
-        msg_text = msg_text[:-4] 
+        msg_text = msg_text[:-4]
 
     if dst_call.find(',') > 0:
         dst_call = dst_call[:dst_call.find(',')]
@@ -601,7 +602,7 @@ def create_tab(dst_call):
                 tab_frames[dst_call].tag_add(msg_tag, start_index, f"{start_index} lineend")
 
                 if confirmed:
-                    tab_frames[dst_call].tag_config(msg_tag, foreground="green")  # Ändere die Farbe               
+                    tab_frames[dst_call].tag_config(msg_tag, foreground="green")  # Ändere die Farbe
                 tab_frames[dst_call].config(state=tk.DISABLED)
                 tab_frames[dst_call].yview(tk.END)
             except:
@@ -615,7 +616,7 @@ def create_tab(dst_call):
 
 def close_tab(dst_call, tab_frame):
     global chat_storage
-    save_chatlog(chat_storage) 
+    save_chatlog(chat_storage)
     if dst_call in tab_frames:
         del tab_frames[dst_call]
     tab_control.forget(tab_frame)
@@ -817,7 +818,7 @@ def main():
     vcmd = root.register(validate_length)  # Validation-Command registrieren
     message_entry = tk.Entry(input_frame, width=40, validate="key", validatecommand=(vcmd, "%P"))
     message_entry.grid(row=0, column=1, columnspan=3, padx=5, pady=5)
-    message_entry.bind("<Return>", send_message) 
+    message_entry.bind("<Return>", send_message)
 
     tk.Label(input_frame, text=_("Wartezeit:")).grid(row=1, column=0, padx=5, pady=5, sticky="e")
     timer_label = tk.Label(input_frame, text=_("Bereit zum Senden"))
