@@ -211,7 +211,7 @@ class WatchlistDialog(tk.Toplevel):
             self.entry_callsign.delete(0, tk.END)
             self.save_watchlist()
         elif callsign in watchlist:
-            messagebox.showwarning(_("Warnung"), ("{callsign} ist bereits in der Watchlist.").format(callsign=callsign))
+            messagebox.showwarning(_("Warnung"), _("{callsign} ist bereits in der Watchlist.").format(callsign=callsign))
 
 
     def remove_callsign(self):
@@ -239,10 +239,8 @@ def load_settings():
         MYCALL = config.get("Settings", "MyCall", fallback=MYCALL)
         volume = config.getfloat("Settings", "Volume", fallback=0.5)
         SEND_DELAY = config.getint("Settings", "SendDelay", fallback=40)
-        if SEND_DELAY < 10:
-            SEND_DELAY = 10
-        if SEND_DELAY > 40:
-            SEND_DELAY = 40
+        SEND_DELAY = max(SEND_DELAY, 10)
+        SEND_DELAY = min(SEND_DELAY, 40)
         language = config.get("GUI", "Language", fallback="de")
         watchlist = set(config.get("watchlist", "callsigns", fallback="").split(","))
         open_tabs = sorted(set(config.get("tablist", "tabs", fallback="").split(",")))
@@ -520,7 +518,7 @@ def send_message(event=None):
     current_time = time.time()
 
     if current_time - last_sent_time < SEND_DELAY:
-        return  
+        return
 
     last_sent_time = current_time
     send_button.config(state=tk.DISABLED)  # Button deaktivieren
