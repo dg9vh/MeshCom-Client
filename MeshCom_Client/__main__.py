@@ -368,7 +368,7 @@ def play_sound_with_volume(file_path, volume=1.0):
             
     except Exception as e:
         print(_("Fehler beim Abspielen der Sounddatei: {e}").format(e=e))
-        
+    
 
 def receive_messages():
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -380,7 +380,12 @@ def receive_messages():
             data, addr = server_sock.recvfrom(1024)
             decoded_data = data.decode('utf-8')
             print(_("Daten empfangen von {addr}: {decoded_data}").format(addr=addr, decoded_data=decoded_data))
-
+            
+            #
+            # Hier muss noch was gemacht werden, um "" in den Nachrichten richtig zu verarbeiten. Diese werden von MeshCom-Seite nicht korrekt codiert und liefern
+            # invalide JSON-Daten... Beispiel: gesendet wurde: g "k"
+            # Daten empfangen von ('192.168.178.151', 1799): {"src_type":"lora","type":"msg","src":"DG9VH-70","dst":"9","msg":"g "k"","msg_id":"05EC2C57"}
+            #
             json_data = json.loads(decoded_data)
             display_message(json_data)
         except Exception as e:

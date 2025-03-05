@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-03-03 22:28+0100\n"
-"PO-Revision-Date: 2025-03-03 22:31+0100\n"
+"PO-Revision-Date: 2025-03-05 13:27+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -178,11 +178,11 @@ msgstr "Restore chat history"
 
 #: __main__.py:651 __main__.py:783
 msgid "Node-IP konfigurieren"
-msgstr "Configure node-ip"
+msgstr "Configure node-address"
 
 #: __main__.py:651
 msgid "Geben Sie die neue Node-IP-Adresse ein:"
-msgstr "Enter new node ip-address:"
+msgstr "Enter new node address:"
 
 #: __main__.py:655 __main__.py:665 __main__.py:683
 msgid "Einstellung gespeichert"
@@ -191,7 +191,7 @@ msgstr "Settings saved"
 #: __main__.py:655
 #, python-brace-format
 msgid "Neue Node-IP: {DESTINATION_IP}"
-msgstr "New node-IP: {DESTINATION_IP}"
+msgstr "New node-address: {DESTINATION_IP}"
 
 #: __main__.py:661
 msgid "Eigenes Rufzeichen konfigurieren"
