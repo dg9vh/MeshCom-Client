@@ -86,7 +86,7 @@ tab_highlighted = set()  # Set für Tabs, die hervorgehoben werden sollen
 
 
 #Set für Watchlist
-watchlist = set()
+WATCHLIST = set()
 
 # Dictionary zum Speichern der Text-Widgets für verschiedene Rufzeichen-Tabs
 text_areas = {}
@@ -189,14 +189,15 @@ class SettingsDialog(tk.Toplevel):
 
 
     def save_settings(self):
-        # Lautstärke speichern und zurückgeben
+        """ Lautstärke speichern und zurückgeben """
         newvolume = self.volume_slider.get()
         self.save_callback(newvolume, NEW_MESSAGE, CALLSIGN_ALERT, OWN_CALLSIGN)
         self.destroy()
 
 
 class WatchlistDialog(tk.Toplevel):
-    def __init__(self, master, watchlist, save_callback):
+    """ Öffnet einen Dialog zur Konfiguration der Watchlist """
+    def __init__(self, master, WATCHLIST, save_callback):
         super().__init__(master)
         self.title(_("Einstellungen"))
         self.geometry("600x400")
@@ -220,7 +221,7 @@ class WatchlistDialog(tk.Toplevel):
         self.btn_remove.grid(row=1, column=2, padx=5)
 
         # Watchlist laden
-        for call in watchlist:
+        for call in WATCHLIST:
             self.listbox.insert(tk.END, call)
 
 
@@ -232,12 +233,12 @@ class WatchlistDialog(tk.Toplevel):
     def add_callsign(self):
         """Fügt ein neues Rufzeichen zur Watchlist hinzu."""
         callsign = self.entry_callsign.get().strip().upper()
-        if callsign and callsign not in watchlist:
-            watchlist.add(callsign)
+        if callsign and callsign not in WATCHLIST:
+            WATCHLIST.add(callsign)
             self.listbox.insert(tk.END, callsign)
             self.entry_callsign.delete(0, tk.END)
             self.save_watchlist()
-        elif callsign in watchlist:
+        elif callsign in WATCHLIST:
             messagebox.showwarning(_("Warnung"), \
                 _("{callsign} ist bereits in der Watchlist.").format(callsign=callsign))
 
@@ -247,7 +248,7 @@ class WatchlistDialog(tk.Toplevel):
         selected = self.listbox.curselection()
         if selected:
             callsign = self.listbox.get(selected[0])
-            watchlist.remove(callsign)
+            WATCHLIST.remove(callsign)
             self.listbox.delete(selected[0])
             self.save_watchlist()
 
@@ -255,7 +256,7 @@ class WatchlistDialog(tk.Toplevel):
     def save_settings(self):
         """Speichert die Watchlist."""
         # Watchlist speichern und zurückgeben
-        self.save_callback(watchlist)
+        self.save_callback(WATCHLIST)
         self.destroy()
 
 
@@ -264,7 +265,7 @@ def load_settings():
     global DESTINATION_IP, \
         MYCALL, VOLUME, \
         LANGUAGE, \
-        watchlist, \
+        WATCHLIST, \
         NEW_MESSAGE, \
         CALLSIGN_ALERT, \
         OWN_CALLSIGN, \
@@ -280,7 +281,7 @@ def load_settings():
         SEND_DELAY = max(SEND_DELAY, 10)
         SEND_DELAY = min(SEND_DELAY, 40)
         LANGUAGE = config.get("GUI", "Language", fallback="de")
-        watchlist = set(config.get("watchlist", "callsigns", fallback="").split(","))
+        WATCHLIST = set(config.get("watchlist", "callsigns", fallback="").split(","))
         open_tabs = sorted(set(config.get("tablist", "tabs", fallback="").split(",")))
 
         NEW_MESSAGE = config.get("Audio", "new_message", fallback=NEW_MESSAGE)
@@ -311,7 +312,7 @@ def save_settings():
         "callsign_alert": CALLSIGN_ALERT,
         "own_callsign": OWN_CALLSIGN,
     }
-    config["watchlist"] = {"callsigns": ",".join(watchlist)}
+    config["watchlist"] = {"callsigns": ",".join(WATCHLIST)}
     config["tablist"] = {"tabs": ",".join(tab_frames)}
 
     with open(CONFIG_FILE, "w", encoding = "UTF8") as configfile:
@@ -338,12 +339,12 @@ def open_settings_dialog():
 def open_watchlist_dialog():
     """ Öffnet die Watchlist-Konfiguration """
     def save_watchlist(new_watchlist):
-        global watchlist
-        watchlist = new_watchlist
+        global WATCHLIST
+        WATCHLIST = new_watchlist
         save_settings()
         print(_("Watchlist gespeichert"))
 
-    WatchlistDialog(ROOT, watchlist, save_watchlist)
+    WatchlistDialog(ROOT, WATCHLIST, save_watchlist)
 
 
 def save_chatlog(chat_data):
@@ -498,7 +499,7 @@ def display_message(message):
     add_message(dst_call, display_text, msg_tag, confirmed)
 
     callsign = extract_callsign(src_call)
-    if callsign in watchlist:
+    if callsign in WATCHLIST:
         print(_("ALERT: {callsign} erkannt!").format(callsign=callsign))
         play_sound_with_volume(CALLSIGN_ALERT, VOLUME)
     elif src_call == MYCALL:
