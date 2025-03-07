@@ -10,11 +10,12 @@ import threading
 import tkinter as tk
 from tkinter import ttk, simpledialog, messagebox, filedialog
 import time
-import tomllib  # Falls Python < 3.11, dann: import toml
 import sys
 from importlib.metadata import version, PackageNotFoundError
 import collections
 import gettext
+from gettext import gettext as _
+import tomllib  # Falls Python < 3.11, dann: import toml
 import pygame
 
 
@@ -48,7 +49,7 @@ if __version__ == "unknown":
 print(f"MeshCom-Client Version: {__version__}")
 
 
-last_sent_time = 0  # Speichert die Zeit der letzten Nachricht
+LAST_SENT_TIME = 0  # Speichert die Zeit der letzten Nachricht
 SEND_DELAY = 40  # Wartezeit zum Senden neuer Nachrichten in Sekunden
 
 # Wir speichern die letzten 20 IDs in einer deque
@@ -90,9 +91,9 @@ watchlist = set()
 # Dictionary zum Speichern der Text-Widgets für verschiedene Rufzeichen-Tabs
 text_areas = {}
 
-language = "de" # Standardsprache
+LANGUAGE = "de" # Standardsprache
 
-volume = 0.5  # Standardlautstärke (50%)
+VOLUME = 0.5  # Standardlautstärke (50%)
 
 # Ziel-IP aus Einstellungen laden oder Standardwert setzen
 DESTINATION_IP = "192.168.178.28"
@@ -100,9 +101,27 @@ DESTINATION_IP = "192.168.178.28"
 # Eigenes Rufzeichen aus Einstellungen laden oder Standardwert setzen
 MYCALL = "DG9VH-99"
 
+#globals
+NET_TIME = None
+SEND_BUTTON = None
+TIMER_LABEL = None
+CHARACTERS_LEFT = None
+MESSAGE_ENTRY = None
+TAB_CONTROL = None
+CHAT_STORAGE = None
+DST_ENTRY = None
+ROOT = None
+
 
 class SettingsDialog(tk.Toplevel):
-    def __init__(self, master, initial_volume, initial_new_message, initial_callsign_alert, initial_owncall_alert, save_callback):
+    """Öffnet einen Einstellungs-Dialog und setzt die Lautstärke."""
+    def __init__(self, \
+        master, \
+            initial_volume, \
+                initial_new_message, \
+                    initial_callsign_alert, \
+                        initial_owncall_alert, \
+                            save_callback):
         super().__init__(master)
         self.title(_("Einstellungen"))
         self.geometry("700x450")
@@ -125,17 +144,23 @@ class SettingsDialog(tk.Toplevel):
         self.volume_slider.set(initial_volume)
         self.volume_slider.pack(pady=10)
 
-        self.new_message_label = tk.Label(self, text = _("Neue Nachricht:") + " " + initial_new_message, width=200)
+        self.new_message_label = \
+            tk.Label(self, text = _("Neue Nachricht:") + " " + initial_new_message, width=200)
         self.new_message_label.pack(pady=10)
-        ttk.Button(self, text=_("Datei wählen"), command = self.choose_new_message_file).pack(pady=10)
+        ttk.Button(self, text=_("Datei wählen"), \
+            command = self.choose_new_message_file).pack(pady=10)
 
-        self.callsign_alert_label = tk.Label(self, text = _("Watchlist-Hinweis:") + " " + initial_callsign_alert, width=200)
+        self.callsign_alert_label = tk.Label(self, \
+            text = _("Watchlist-Hinweis:") + " " + initial_callsign_alert, width=200)
         self.callsign_alert_label.pack(pady=10)
-        ttk.Button(self, text=_("Datei wählen"), command = self.choose_callsign_alert_file).pack(pady=10)
+        ttk.Button(self, text=_("Datei wählen"), \
+            command = self.choose_callsign_alert_file).pack(pady=10)
 
-        self.owncall_alert_label = tk.Label(self, text = _("Eigenes Rufzeichen-Hinweis:") + " " + initial_owncall_alert, width=200)
+        self.owncall_alert_label = tk.Label(self, \
+            text = _("Eigenes Rufzeichen-Hinweis:") + " " + initial_owncall_alert, width=200)
         self.owncall_alert_label.pack(pady=10)
-        ttk.Button(self, text=_("Datei wählen"), command = self.choose_owncall_alert_file).pack(pady=10)
+        ttk.Button(self, text=_("Datei wählen"), \
+            command = self.choose_owncall_alert_file).pack(pady=10)
 
         # Speichern-Button
         ttk.Button(self, text=_("Speichern"), command = self.save_settings).pack(pady=10)
@@ -159,7 +184,8 @@ class SettingsDialog(tk.Toplevel):
         """Öffnet einen Datei-Dialog und setzt die Variable auf den ausgewählten Dateinamen."""
         global OWN_CALLSIGN
         OWN_CALLSIGN = filedialog.askopenfilename(filetypes=[("WAV-Dateien", "*.wav")])
-        self.owncall_alert_label.config(text = _("Eigenes Rufzeichen-Hinweis:") + " " + OWN_CALLSIGN)
+        self.owncall_alert_label.config(text = \
+            _("Eigenes Rufzeichen-Hinweis:") + " " + OWN_CALLSIGN)
 
 
     def save_settings(self):
@@ -178,7 +204,8 @@ class WatchlistDialog(tk.Toplevel):
 
         self.save_callback = save_callback
 
-        tk.Label(self, text=_("Rufzeichen hinzufügen (ohne -SSID):")).grid(row=0, column=0, sticky="w")
+        tk.Label(self, text=_("Rufzeichen hinzufügen (ohne -SSID):")) \
+            .grid(row=0, column=0, sticky="w")
 
         self.entry_callsign = tk.Entry(self)
         self.entry_callsign.grid(row=0, column=1, padx=5)
@@ -211,7 +238,8 @@ class WatchlistDialog(tk.Toplevel):
             self.entry_callsign.delete(0, tk.END)
             self.save_watchlist()
         elif callsign in watchlist:
-            messagebox.showwarning(_("Warnung"), _("{callsign} ist bereits in der Watchlist.").format(callsign=callsign))
+            messagebox.showwarning(_("Warnung"), \
+                _("{callsign} ist bereits in der Watchlist.").format(callsign=callsign))
 
 
     def remove_callsign(self):
@@ -225,6 +253,7 @@ class WatchlistDialog(tk.Toplevel):
 
 
     def save_settings(self):
+        """Speichert die Watchlist."""
         # Watchlist speichern und zurückgeben
         self.save_callback(watchlist)
         self.destroy()
@@ -232,16 +261,25 @@ class WatchlistDialog(tk.Toplevel):
 
 def load_settings():
     """Lädt Einstellungen aus der INI-Datei."""
-    global DESTINATION_IP, MYCALL, volume, language, watchlist, NEW_MESSAGE, CALLSIGN_ALERT, OWN_CALLSIGN, SEND_DELAY, open_tabs
+    global DESTINATION_IP, \
+        MYCALL, VOLUME, \
+        LANGUAGE, \
+        watchlist, \
+        NEW_MESSAGE, \
+        CALLSIGN_ALERT, \
+        OWN_CALLSIGN, \
+        SEND_DELAY, \
+        open_tabs
+
     if os.path.exists(CONFIG_FILE):
         config.read(CONFIG_FILE)
         DESTINATION_IP = config.get("Settings", "DestinationIP", fallback=DESTINATION_IP)
         MYCALL = config.get("Settings", "MyCall", fallback=MYCALL)
-        volume = config.getfloat("Settings", "Volume", fallback=0.5)
+        VOLUME = config.getfloat("Settings", "Volume", fallback=0.5)
         SEND_DELAY = config.getint("Settings", "SendDelay", fallback=40)
         SEND_DELAY = max(SEND_DELAY, 10)
         SEND_DELAY = min(SEND_DELAY, 40)
-        language = config.get("GUI", "Language", fallback="de")
+        LANGUAGE = config.get("GUI", "Language", fallback="de")
         watchlist = set(config.get("watchlist", "callsigns", fallback="").split(","))
         open_tabs = sorted(set(config.get("tablist", "tabs", fallback="").split(",")))
 
@@ -251,20 +289,21 @@ def load_settings():
 
 
 def reopen_tabs():
-    global open_tabs
+    """ Öffnet die Tabs,wie sie beim Programmende vorlagen """
+    #global open_tabs
     for tab in open_tabs:
         create_tab(tab)
 
 
 def save_settings():
-    """Speichert Einstellungen in die INI-Datei."""
+    """ Speichert Einstellungen in die INI-Datei."""
     config["GUI"] = {
-        "language": language,
+        "language": LANGUAGE,
     }
     config["Settings"] = {
         "DestinationIP": DESTINATION_IP,
         "MYCALL": MYCALL,
-        "Volume": volume,
+        "Volume": VOLUME,
         "SendDelay": SEND_DELAY,
     }
     config["Audio"] = {
@@ -275,68 +314,77 @@ def save_settings():
     config["watchlist"] = {"callsigns": ",".join(watchlist)}
     config["tablist"] = {"tabs": ",".join(tab_frames)}
 
-    with open(CONFIG_FILE, "w") as configfile:
+    with open(CONFIG_FILE, "w", encoding = "UTF8") as configfile:
         config.write(configfile)
 
 
 def open_settings_dialog():
+    """ Liest Einstellungen aus der INI-Datei."""
     def save_audio_settings(new_volume, new_newmessage, new_callsign_alert, new_own_callsign):
-        global volume, NEW_MESSAGE
-        volume = new_volume
+        global VOLUME, NEW_MESSAGE, CALLSIGN_ALERT, OWN_CALLSIGN
+        VOLUME = new_volume
         NEW_MESSAGE = new_newmessage
         CALLSIGN_ALERT = new_callsign_alert
         OWN_CALLSIGN = new_own_callsign
         save_settings()
-        print(_("Lautstärke gespeichert: {volume}").format(volume=volume))
+        print(_("Lautstärke gespeichert: {VOLUME}").format(VOLUME=VOLUME))
         print(_("Neue Nachricht-Hinweis: {NEW_MESSAGE}").format(NEW_MESSAGE=NEW_MESSAGE))
         print(_("Rufzeichen-Hinweis: {CALLSIGN_ALERT}").format(CALLSIGN_ALERT=CALLSIGN_ALERT))
         print(_("Eigenes-Rufzeichen-Hinweis: {OWN_CALLSIGN}").format(OWN_CALLSIGN=OWN_CALLSIGN))
 
-    SettingsDialog(root, volume, NEW_MESSAGE, CALLSIGN_ALERT, OWN_CALLSIGN, save_audio_settings)
+    SettingsDialog(ROOT, VOLUME, NEW_MESSAGE, CALLSIGN_ALERT, OWN_CALLSIGN, save_audio_settings)
 
 
 def open_watchlist_dialog():
+    """ Öffnet die Watchlist-Konfiguration """
     def save_watchlist(new_watchlist):
         global watchlist
         watchlist = new_watchlist
         save_settings()
         print(_("Watchlist gespeichert"))
 
-    WatchlistDialog(root, watchlist, save_watchlist)
+    WatchlistDialog(ROOT, watchlist, save_watchlist)
 
 
 def save_chatlog(chat_data):
-    with open(CHATLOG_FILE, "w") as f:
+    """ Speichert den Chat-Verlauf """
+    with open(CHATLOG_FILE, "w", encoding = "UTF8") as f:
         print(_("Speichere Chatverlauf"))
         json.dump(chat_data, f, indent=4)
         print(_("Speichern beendet"))
 
 
 # Funktion zum Löschen des Chatverlaufs
-def delete_chat(rufzeichen, text_widget, tab_control, tab):
-    #global chat_storage
+def delete_chat(rufzeichen, text_widget, TAB_CONTROL, tab):
+    """ Löscht Chatverlauf """
+    #global CHAT_STORAGE
 
-    if rufzeichen in chat_storage:
+    if rufzeichen in CHAT_STORAGE:
         # Bestätigung einholen
-        if messagebox.askyesno(_("Chat löschen"), _("Soll der Chatverlauf für {rufzeichen} wirklich gelöscht werden?").format(rufzeichen=rufzeichen)):
+        if messagebox.askyesno(_("Chat löschen"), \
+            _("Soll der Chatverlauf für {rufzeichen} wirklich gelöscht werden?") \
+                .format(rufzeichen=rufzeichen)):
             # Entferne den Chat aus der Datei
-            del chat_storage[rufzeichen]
-            save_chatlog(chat_storage)
+            del CHAT_STORAGE[rufzeichen]
+            save_chatlog(CHAT_STORAGE)
 
             # Entferne den Chat aus der GUI (Textfeld leeren)
             text_widget.delete("1.0", tk.END)
 
             # Optional: Tab schließen
-            tab_control.forget(tab)
+            TAB_CONTROL.forget(tab)
 
-            messagebox.showinfo(_("Gelöscht"), _("Chatverlauf für {rufzeichen} wurde gelöscht.").format(rufzeichen=rufzeichen))
+            messagebox.showinfo(_("Gelöscht"), \
+                _("Chatverlauf für {rufzeichen} wurde gelöscht.").format(rufzeichen=rufzeichen))
     else:
-        messagebox.showwarning(_("Nicht gefunden"), _("Kein Chatverlauf für {rufzeichen} vorhanden.").format(rufzeichen=rufzeichen))
+        messagebox.showwarning(_("Nicht gefunden"), \
+            _("Kein Chatverlauf für {rufzeichen} vorhanden.").format(rufzeichen=rufzeichen))
 
 
 def load_chatlog():
+    """ Lädt den Chatverlauf """
     if os.path.exists(CHATLOG_FILE):
-        with open(CHATLOG_FILE, "r") as f:
+        with open(CHATLOG_FILE, "r", encoding = "UTF8") as f:
             return json.load(f)
     return {}
 
@@ -361,21 +409,18 @@ def play_sound_with_volume(file_path, volume=1.0):
 
 
 def receive_messages():
+    """ Empfang der Nachrichten """
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_sock.bind((UDP_IP_ADDRESS, UDP_PORT_NO))
-    print(_("Server gestarted, hört auf {UDP_IP_ADDRESS}:{UDP_PORT_NO}").format(UDP_IP_ADDRESS=UDP_IP_ADDRESS, UDP_PORT_NO=UDP_PORT_NO))
+    print(_("Server gestarted, hört auf {UDP_IP_ADDRESS}:{UDP_PORT_NO}") \
+        .format(UDP_IP_ADDRESS=UDP_IP_ADDRESS, UDP_PORT_NO=UDP_PORT_NO))
 
     while True:
         try:
             data, addr = server_sock.recvfrom(1024)
             decoded_data = data.decode('utf-8')
-            print(_("Daten empfangen von {addr}: {decoded_data}").format(addr=addr, decoded_data=decoded_data))
-
-            #
-            # Hier muss noch was gemacht werden, um "" in den Nachrichten richtig zu verarbeiten. Diese werden von MeshCom-Seite nicht korrekt codiert und liefern
-            # invalide JSON-Daten... Beispiel: gesendet wurde: g "k"
-            # Daten empfangen von ('192.168.178.151', 1799): {"src_type":"lora","type":"msg","src":"DG9VH-70","dst":"9","msg":"g "k"","msg_id":"05EC2C57"}
-            #
+            print(_("Daten empfangen von {addr}: {decoded_data}") \
+                .format(addr=addr, decoded_data=decoded_data))
             json_data = json.loads(decoded_data)
             display_message(json_data)
         except Exception as e:
@@ -383,6 +428,7 @@ def receive_messages():
 
 
 def display_message(message):
+    """ Anzeige der Nachrichten """
     src_call = message.get('src', 'Unknown')
     dst_call = message.get('dst', 'Unknown')
 
@@ -409,7 +455,8 @@ def display_message(message):
                 update_message(dst_call, msg_tag)
                 return
 
-    if src_call == MYCALL and msg_text[-4] == "{" and not (isinstance(dst_call, int) or dst_call =="*"):
+    if src_call == MYCALL and msg_text[-4] == "{" \
+        and not (isinstance(dst_call, int) or dst_call =="*"):
         msg_tag = msg_text[-3:]
         msg_text = msg_text[:-4]
 
@@ -420,17 +467,18 @@ def display_message(message):
         return
 
     if message_id in received_ids:
-        print(_("Nachricht mit ID {message_id} bereits empfangen und verarbeitet.").format(message_id=message_id))
+        print(_("Nachricht mit ID {message_id} bereits empfangen und verarbeitet.")\
+            .format(message_id=message_id))
         return  # Nachricht wird ignoriert, da sie bereits verarbeitet wurde
 
     if msg_text == '':
         return
 
     if "{CET}"in msg_text:
-        net_time.config(state="normal")
-        net_time.delete(0, tk.END)
-        net_time.insert(0, msg_text[5:])
-        net_time.config(state="disabled")
+        NET_TIME.config(state="normal")
+        NET_TIME.delete(0, tk.END)
+        NET_TIME.insert(0, msg_text[5:])
+        NET_TIME.config(state="disabled")
         return
 
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -452,13 +500,13 @@ def display_message(message):
     callsign = extract_callsign(src_call)
     if callsign in watchlist:
         print(_("ALERT: {callsign} erkannt!").format(callsign=callsign))
-        play_sound_with_volume(CALLSIGN_ALERT, volume)
+        play_sound_with_volume(CALLSIGN_ALERT, VOLUME)
     elif src_call == MYCALL:
         print(_("ALERT: Eigenes Rufzeichen").format(callsign=callsign))
-        play_sound_with_volume(OWN_CALLSIGN, volume)
+        play_sound_with_volume(OWN_CALLSIGN, VOLUME)
     elif src_call != "You":
         print(_("ALERT: Normale Nachricht").format(callsign=callsign))
-        play_sound_with_volume(NEW_MESSAGE, volume)
+        play_sound_with_volume(NEW_MESSAGE, VOLUME)
 
     # Tab hervorheben
     if src_call != MYCALL:
@@ -472,6 +520,7 @@ def display_message(message):
 
 
 def add_message(call, message, msg_tag, confirmed=False):
+    """ Fügt eine Nachricht in die Chat-Historie ein """
     message_data = {
         "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         "message": message.strip(),
@@ -479,49 +528,52 @@ def add_message(call, message, msg_tag, confirmed=False):
         "confirmed": confirmed
     }
 
-    if call not in chat_storage:
-        chat_storage[call] = []
-    chat_storage[call].append(message_data)
-    save_chatlog(chat_storage)  # Speichert die Chats direkt
+    if call not in CHAT_STORAGE:
+        CHAT_STORAGE[call] = []
+    CHAT_STORAGE[call].append(message_data)
+    save_chatlog(CHAT_STORAGE)  # Speichert die Chats direkt
 
 
 def update_message(call, msg_tag):
-    for entry in chat_storage[call]:
+    """ Aktualisiert eine Nachricht in der Historie """
+    for entry in CHAT_STORAGE[call]:
         if entry.get("msg_tag") == msg_tag:
             entry["confirmed"] = True
 
-    save_chatlog(chat_storage)  # Speichert die Chats direkt
+    save_chatlog(CHAT_STORAGE)  # Speichert die Chats direkt
 
 
 def update_timer():
-    remaining_time = max(0, int(SEND_DELAY - (time.time() - last_sent_time)))
+    """ Aktualisiert den Wartetimer """
+    remaining_time = max(0, int(SEND_DELAY - (time.time() - LAST_SENT_TIME)))
 
     if remaining_time > 0:
-        timer_label.config(text=f"{remaining_time}s")
-        root.after(1000, update_timer)  # Aktualisiert jede Sekunde
+        TIMER_LABEL.config(text=f"{remaining_time}s")
+        ROOT.after(1000, update_timer)  # Aktualisiert jede Sekunde
     else:
-        timer_label.config(text=_("Bereit zum Senden"))
-        send_button.config(state=tk.NORMAL)  # Button wieder aktivieren
+        TIMER_LABEL.config(text=_("Bereit zum Senden"))
+        SEND_BUTTON.config(state=tk.NORMAL)  # Button wieder aktivieren
 
 
 def send_message(event=None):
-    global last_sent_time
+    """ Versendet Nachricht """
+    global LAST_SENT_TIME
 
-    msg_text = message_entry.get()
+    msg_text = MESSAGE_ENTRY.get()
     msg_text = msg_text.replace('"',"'")
 
-    dst_call = dst_entry.get() or DEFAULT_DST
+    dst_call = DST_ENTRY.get() or DEFAULT_DST
 
     if not msg_text.strip():
         return
 
     current_time = time.time()
 
-    if current_time - last_sent_time < SEND_DELAY:
+    if current_time - LAST_SENT_TIME < SEND_DELAY:
         return
 
-    last_sent_time = current_time
-    send_button.config(state=tk.DISABLED)  # Button deaktivieren
+    LAST_SENT_TIME = current_time
+    SEND_BUTTON.config(state=tk.DISABLED)  # Button deaktivieren
     update_timer()  # Countdown aktualisieren
 
     message = {
@@ -539,20 +591,21 @@ def send_message(event=None):
         print(_("Fehler beim Senden: {e}").format(e=e))
     finally:
         client_sock.close()
-        message_entry.delete(0, tk.END)
+        MESSAGE_ENTRY.delete(0, tk.END)
 
 
 def validate_length(new_text):
     """Validiert die Länge der Eingabe."""
     chars_left = MAX_MESSAGE_LENGTH - len(new_text)
-    characters_left.config(text = str(chars_left))
+    CHARACTERS_LEFT.config(text = str(chars_left))
     return len(new_text) <= MAX_MESSAGE_LENGTH
 
 
 def create_tab(dst_call):
+    """ Erzeugt einen neuen Tab für ein Rufzeichen """
     #global text_areas
-    tab_frame = ttk.Frame(tab_control)
-    tab_control.add(tab_frame, text=dst_call)
+    tab_frame = ttk.Frame(TAB_CONTROL)
+    TAB_CONTROL.add(tab_frame, text=dst_call)
 
     # Titel und Schließen-Button
     tab_header = tk.Frame(tab_frame)
@@ -562,11 +615,13 @@ def create_tab(dst_call):
     title_label.bind("<Button-1>", reset_tab_highlight)
     title_label.pack(side=tk.LEFT, padx=5)
 
-    close_button = tk.Button(tab_header, text="X", command=lambda: close_tab(dst_call, tab_frame), width=2)
+    close_button = tk.Button(tab_header, text="X", \
+        command=lambda: close_tab(dst_call, tab_frame), width=2)
     close_button.pack(side=tk.RIGHT, padx=5)
 
     # Button zum Löschen des Chats
-    delete_button = tk.Button(tab_header, text=_("Chat löschen"), command=lambda: delete_chat(dst_call, text_area, tab_control, tab_frame))
+    delete_button = tk.Button(tab_header, text=_("Chat löschen"), \
+        command=lambda: delete_chat(dst_call, text_area, TAB_CONTROL, tab_frame))
     delete_button.pack(side=tk.RIGHT, padx=5)
 
     # Textfeld
@@ -582,9 +637,9 @@ def create_tab(dst_call):
     text_area.config(yscrollcommand=scrollbar.set)
 
     tab_frames[dst_call] = text_area
-    if dst_call in chat_storage:
+    if dst_call in CHAT_STORAGE:
         print(_("Chat-Historie wiederherstellen"))
-        for msg in chat_storage[dst_call]:
+        for msg in CHAT_STORAGE[dst_call]:
             confirmed = False
             try:
                 if msg['confirmed']:
@@ -593,14 +648,14 @@ def create_tab(dst_call):
                 msg_tag = msg_text
                 start_index = tab_frames[dst_call].index("end-1c linestart")
                 tab_frames[dst_call].config(state=tk.NORMAL)
-                tab_frames[dst_call].insert(tk.END, msg_text + "\n") # Chatverlauf in das Text-Widget einfügen
+                tab_frames[dst_call].insert(tk.END, msg_text + "\n")
                 tab_frames[dst_call].tag_add(msg_tag, start_index, f"{start_index} lineend")
 
                 if confirmed:
                     tab_frames[dst_call].tag_config(msg_tag, foreground="green")  # Ändere die Farbe
                 tab_frames[dst_call].config(state=tk.DISABLED)
                 tab_frames[dst_call].yview(tk.END)
-            except:
+            except Exception:
                 # Altes Chatlog-Format
                 tab_frames[dst_call].config(state=tk.NORMAL)
                 tab_frames[dst_call].insert(tk.END, msg) # Chatverlauf in das Text-Widget einfügen
@@ -610,78 +665,90 @@ def create_tab(dst_call):
 
 
 def close_tab(dst_call, tab_frame):
-    #global chat_storage
-    save_chatlog(chat_storage)
+    """ Schließt einen ausgewählten Nachrichtentab """
+    #global CHAT_STORAGE
+    save_chatlog(CHAT_STORAGE)
     if dst_call in tab_frames:
         del tab_frames[dst_call]
-    tab_control.forget(tab_frame)
+    TAB_CONTROL.forget(tab_frame)
     save_settings()
 
 
 def highlight_tab(dst_call):
     """Hervorheben des Tabs, wenn eine neue Nachricht eingegangen ist."""
-    for i in range(tab_control.index("end")):
-        if tab_control.tab(i, "text").startswith(dst_call):
-            tab_control.tab(i, text=f"{dst_call} (neu)")
+    for i in range(TAB_CONTROL.index("end")):
+        if TAB_CONTROL.tab(i, "text").startswith(dst_call):
+            TAB_CONTROL.tab(i, text=f"{dst_call} (neu)")
             tab_highlighted.add(dst_call)
             break
 
 
 def reset_tab_highlight(event):
     """Zurücksetzen der Markierung, wenn der Tab geöffnet wird."""
-    current_tab = tab_control.index("current")
-    dst_call = tab_control.tab(current_tab, "text").replace(" (neu)", "")
+    current_tab = TAB_CONTROL.index("current")
+    dst_call = TAB_CONTROL.tab(current_tab, "text").replace(" (neu)", "")
     if dst_call in tab_highlighted:
-        tab_control.tab(current_tab, text=dst_call)
+        TAB_CONTROL.tab(current_tab, text=dst_call)
         tab_highlighted.remove(dst_call)
-    dst_entry.delete(0, tk.END)
-    dst_entry.insert(0, dst_call)
+    DST_ENTRY.delete(0, tk.END)
+    DST_ENTRY.insert(0, dst_call)
 
 
 def configure_destination_ip():
     """Dialog zur Konfiguration der Ziel-IP-Adresse."""
     global DESTINATION_IP
-    new_ip = simpledialog.askstring(_("Node-IP konfigurieren"), _("Geben Sie die neue Node-IP-Adresse ein:"), initialvalue=DESTINATION_IP)
+    new_ip = simpledialog.askstring(_("Node-IP konfigurieren"), \
+        _("Geben Sie die neue Node-IP-Adresse ein:"), initialvalue=DESTINATION_IP)
     if new_ip:
         DESTINATION_IP = new_ip
         save_settings()
-        messagebox.showinfo(_("Einstellung gespeichert"), _("Neue Node-IP: {DESTINATION_IP}").format(DESTINATION_IP=DESTINATION_IP))
+        messagebox.showinfo(_("Einstellung gespeichert"), \
+            _("Neue Node-IP: {DESTINATION_IP}").format(DESTINATION_IP=DESTINATION_IP))
 
 
 def configure_mycall():
     """Dialog zur Konfiguration des eigenen Rufzeichens."""
     global MYCALL
-    new_mycall = simpledialog.askstring(_("Eigenes Rufzeichen konfigurieren"), _("Geben Sie das eigene Rufzeichen mit SSID ein:"), initialvalue=MYCALL)
+    new_mycall = simpledialog.askstring(_("Eigenes Rufzeichen konfigurieren"), \
+        _("Geben Sie das eigene Rufzeichen mit SSID ein:"), initialvalue=MYCALL)
     if new_mycall:
         MYCALL = new_mycall
         save_settings()
-        messagebox.showinfo(_("Einstellung gespeichert"), _("Neues Rufzeichen: {MYCALL}").format(MYCALL=MYCALL))
+        messagebox.showinfo(_("Einstellung gespeichert"), \
+            _("Neues Rufzeichen: {MYCALL}").format(MYCALL=MYCALL))
 
 
 def configure_senddelay():
     """Dialog zur Konfiguration der Wartezeit."""
     global SEND_DELAY
-    new_send_delay = int(simpledialog.askstring(_("Wartezeit konfigurieren"), _("Geben Sie die neue Wartezeit in Sekundn ein (10 ... 40):"), initialvalue=SEND_DELAY))
+    new_send_delay = int(simpledialog.askstring(_("Wartezeit konfigurieren"), \
+        _("Geben Sie die neue Wartezeit in Sekundn ein (10 ... 40):"), initialvalue=SEND_DELAY))
     if new_send_delay < 10:
-        messagebox.showinfo(_("Einstellung korrigieren"), _("Neue Wartezeit: {new_send_delay} ist zu kurz. Bitte mindestens 10 eingeben!").format(new_send_delay=new_send_delay))
+        messagebox.showinfo(_("Einstellung korrigieren"), \
+            _("Neue Wartezeit: {new_send_delay} ist zu kurz. Bitte mindestens 10 eingeben!") \
+                .format(new_send_delay=new_send_delay))
         configure_senddelay()
         return
     if new_send_delay > 40:
-        messagebox.showinfo(_("Einstellung korrigieren"), _("Neue Wartezeit: {new_send_delay} ist zu lang. Bitte maximal 40 eingeben!").format(new_send_delay=new_send_delay))
+        messagebox.showinfo(_("Einstellung korrigieren"), \
+            _("Neue Wartezeit: {new_send_delay} ist zu lang. Bitte maximal 40 eingeben!") \
+                .format(new_send_delay=new_send_delay))
         configure_senddelay()
         return
     if new_send_delay:
         SEND_DELAY = new_send_delay
         save_settings()
-        messagebox.showinfo(_("Einstellung gespeichert"), _("Neue Wartezeit: {SEND_DELAY}").format(SEND_DELAY=SEND_DELAY))
+        messagebox.showinfo(_("Einstellung gespeichert"), \
+            _("Neue Wartezeit: {SEND_DELAY}").format(SEND_DELAY=SEND_DELAY))
 
 
 def set_language(lang):
     """Setzt die Sprache in der Config-Datei und gibt eine Meldung aus."""
-    global language
-    language = lang
+    global LANGUAGE
+    LANGUAGE = lang
     save_settings()
-    messagebox.showinfo(_("Sprache geändert"), _("Die Sprache wurde geändert.\nBitte starten Sie das Programm neu."))
+    messagebox.showinfo(_("Sprache geändert"), \
+        _("Die Sprache wurde geändert.\nBitte starten Sie das Programm neu."))
 
 
 def extract_callsign(src):
@@ -689,8 +756,8 @@ def extract_callsign(src):
     return src.split("-")[0]  # Trenne bei '-' und nimm den ersten Teil
 
 
-# Lade Rufzeichen aus JSON-Datei
 def load_rufzeichen():
+    """ Lade Rufzeichen aus JSON-Datei """
     try:
         with open(CHATLOG_FILE, "r", encoding="utf-8") as file:
             data = json.load(file)
@@ -701,7 +768,7 @@ def load_rufzeichen():
 
 def on_message_click(event, dst_call):
     """Wird aufgerufen, wenn eine Nachricht in der TextArea angeklickt wird"""
-    #global message_entry
+    #global MESSAGE_ENTRY
     try:
         text_widget = text_areas.get(dst_call)
         if not text_widget:
@@ -722,46 +789,64 @@ def on_message_click(event, dst_call):
             sender_callsign = sender_info.split(",")[0]  # Erstes Rufzeichen extrahieren
 
             # Aktuellen Inhalt des Eingabefelds holen
-            current_text = message_entry.get()
+            current_text = MESSAGE_ENTRY.get()
 
             # Prüfen, ob bereits ein Rufzeichen vorhanden ist
             if ":" in current_text:
                 # Falls ja, nur das Rufzeichen ersetzen
-                current_text = current_text.split(":", 1)[1].strip()  # Text hinter dem ersten ":" behalten
+                current_text = current_text \
+                    .split(":", 1)[1].strip()  # Text hinter dem ersten ":" behalten
             else:
                 current_text = ""  # Falls kein ":" existiert, neuen Text setzen
 
             # Neues Rufzeichen mit dem aktuellen Text setzen
-            message_entry.delete(0, tk.END)
-            message_entry.insert(0, f"{sender_callsign}: {current_text}")
-            message_entry.focus_set()
+            MESSAGE_ENTRY.delete(0, tk.END)
+            MESSAGE_ENTRY.insert(0, f"{sender_callsign}: {current_text}")
+            MESSAGE_ENTRY.focus_set()
     except Exception as e:
         print(f"Fehler beim Parsen der Nachricht: {e}")
 
 
 def show_help():
     """Hilfe anzeigen."""
-    messagebox.showinfo(_("Hilfe"), _("Dieses Programm ermöglicht den Empfang und das Senden von Nachrichten über das Meshcom-Netzwerk, indem via UDP eine Verbindung zum Node hergestellt wird. Zur Nutzung mit dem Node ist hier vorher auf dem Node mit --extudpip <ip-adresse des Rechners> sowie --extudp on die Datenübertragung zu aktivieren und über die Einstellungen hier die IP-Adresse des Nodes anzugeben."))
+    messagebox.showinfo(_("Hilfe"), \
+        _("Dieses Programm ermöglicht den Empfang und das Senden von Nachrichten \
+            über das Meshcom-Netzwerk, indem via UDP eine Verbindung zum Node hergestellt wird. \
+                Zur Nutzung mit dem Node ist hier vorher auf dem Node mit --extudpip <ip-adresse des Rechners> \
+                    sowie --extudp on die Datenübertragung zu aktivieren und über die Einstellungen hier \
+                        die IP-Adresse des Nodes anzugeben."))
 
 
 def show_about():
     """Über-Dialog anzeigen."""
     #global __version__
-    messagebox.showinfo(_("Über"), _("MeshCom Client\nVersion {__version__}\nEntwickelt von DG9VH").format(__version__=__version__))
+    messagebox.showinfo(_("Über"), \
+        _("MeshCom Client\nVersion {__version__}\nEntwickelt von DG9VH") \
+            .format(__version__=__version__))
 
 
 def on_closing():
-    save_chatlog(chat_storage)  # Speichert alle offenen Chats
-    root.destroy()  # Schließt das Tkinter-Fenster
+    """ Abschließendes beim Beenden des Programms """
+    save_chatlog(CHAT_STORAGE)  # Speichert alle offenen Chats
+    ROOT.destroy()  # Schließt das Tkinter-Fenster
 
 
 def main():
-    global root, tab_control, chat_storage, dst_entry, message_entry, net_time, characters_left, timer_label, send_button
+    """ Hier das Hauptprogramm """
+    global ROOT, \
+        TAB_CONTROL, \
+            CHAT_STORAGE, \
+                DST_ENTRY, \
+                    MESSAGE_ENTRY, \
+                        NET_TIME, \
+                            CHARACTERS_LEFT, \
+                                TIMER_LABEL, \
+                                    SEND_BUTTON
     # GUI-Setup
-    root = tk.Tk()
-    root.title(f"MeshCom Client {__version__} by DG9VH")
-    root.geometry("950x400")  # Fenstergröße auf 950x400 setzen
-    root.protocol("WM_DELETE_WINDOW", on_closing)  # Fängt das Schließen ab
+    ROOT = tk.Tk()
+    ROOT.title(f"MeshCom Client {__version__} by DG9VH")
+    ROOT.geometry("950x400")  # Fenstergröße auf 950x400 setzen
+    ROOT.protocol("WM_DELETE_WINDOW", on_closing)  # Fängt das Schließen ab
 
     load_settings()
 
@@ -769,17 +854,17 @@ def main():
     localedir = current_dir / "locales"
 
     # initialisiere Gettext
-    en_i18n = gettext.translation(appname, localedir, fallback=True, languages=[language])
+    en_i18n = gettext.translation(appname, localedir, fallback=True, languages=[LANGUAGE])
     en_i18n.install()
 
-    chat_storage = load_chatlog()  # Lädt vorhandene Chatlogs beim Programmstart
+    CHAT_STORAGE = load_chatlog()  # Lädt vorhandene Chatlogs beim Programmstart
 
     # Menüleiste
-    menu_bar = tk.Menu(root)
-    root.config(menu=menu_bar)
+    menu_bar = tk.Menu(ROOT)
+    ROOT.config(menu=menu_bar)
 
     file_menu = tk.Menu(menu_bar, tearoff=0)
-    file_menu.add_command(label=_("Beenden"), command=root.quit)
+    file_menu.add_command(label=_("Beenden"), command=ROOT.quit)
     menu_bar.add_cascade(label=_("Datei"), menu=file_menu)
 
     settings_menu = tk.Menu(menu_bar, tearoff=0)
@@ -802,46 +887,50 @@ def main():
     help_menu.add_command(label=_("Über"), command=show_about)
     menu_bar.add_cascade(label=_("Hilfe"), menu=help_menu)
 
-    tab_control = ttk.Notebook(root)
-    tab_control.bind("<<NotebookTabChanged>>", reset_tab_highlight)
+    TAB_CONTROL = ttk.Notebook(ROOT)
+    TAB_CONTROL.bind("<<NotebookTabChanged>>", reset_tab_highlight)
 
-    input_frame = tk.Frame(root)
+    input_frame = tk.Frame(ROOT)
     input_frame.pack(fill="x", padx=10, pady=5)
 
     tk.Label(input_frame, text=_("Nachricht:")).grid(row=0, column=0, padx=5, pady=5, sticky="e")
 
-    vcmd = root.register(validate_length)  # Validation-Command registrieren
-    message_entry = tk.Entry(input_frame, width=40, validate="key", validatecommand=(vcmd, "%P"))
-    message_entry.grid(row=0, column=1, columnspan=3, padx=5, pady=5)
-    message_entry.bind("<Return>", send_message)
+    vcmd = ROOT.register(validate_length)  # Validation-Command registrieren
+    MESSAGE_ENTRY = tk.Entry(input_frame, width=40, validate="key", validatecommand=(vcmd, "%P"))
+    MESSAGE_ENTRY.grid(row=0, column=1, columnspan=3, padx=5, pady=5)
+    MESSAGE_ENTRY.bind("<Return>", send_message)
 
     tk.Label(input_frame, text=_("Wartezeit:")).grid(row=1, column=0, padx=5, pady=5, sticky="e")
-    timer_label = tk.Label(input_frame, text=_("Bereit zum Senden"))
-    timer_label.grid(row=1, column=1, padx=5, pady=5, sticky="w")
+    TIMER_LABEL = tk.Label(input_frame, text=_("Bereit zum Senden"))
+    TIMER_LABEL.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 
-    tk.Label(input_frame, text=_("Zeichen übrig:")).grid(row=1, column=2, padx=5, pady=5, sticky="e")
-    characters_left = tk.Label(input_frame, text="149")
-    characters_left.grid(row=1, column=3, padx=5, pady=5, sticky="w")
+    tk.Label(input_frame, text=_("Zeichen übrig:")) \
+        .grid(row=1, column=2, padx=5, pady=5, sticky="e")
+    CHARACTERS_LEFT = tk.Label(input_frame, text="149")
+    CHARACTERS_LEFT.grid(row=1, column=3, padx=5, pady=5, sticky="w")
 
     tk.Label(input_frame, text=_("Ziel:")).grid(row=2, column=0, padx=5, pady=5, sticky="e")
-    dst_entry = tk.Entry(input_frame, width=20)
-    dst_entry.insert(0, DEFAULT_DST)
-    dst_entry.grid(row=2, column=1, columnspan=3, padx=5, pady=5, sticky="w")
+    DST_ENTRY = tk.Entry(input_frame, width=20)
+    DST_ENTRY.insert(0, DEFAULT_DST)
+    DST_ENTRY.grid(row=2, column=1, columnspan=3, padx=5, pady=5, sticky="w")
 
-    send_button = tk.Button(input_frame, text=_("Senden"), command=send_message)
-    send_button.grid(row=0, column=4, rowspan=2, padx=5, pady=5, sticky="ns")
+    SEND_BUTTON = tk.Button(input_frame, text=_("Senden"), command=send_message)
+    SEND_BUTTON.grid(row=0, column=4, rowspan=2, padx=5, pady=5, sticky="ns")
 
-    tk.Label(input_frame, text=_("Letzte Uhrzeit vom Netz (UTC):")).grid(row=0, column=5, padx=5, pady=5, sticky="w")
-    net_time = tk.Entry(input_frame, width=25)
-    net_time.grid(row=1, column=5, padx=5, pady=5, sticky="w")
-    net_time.config(state="disabled")
+    tk.Label(input_frame, text=_("Letzte Uhrzeit vom Netz (UTC):")) \
+        .grid(row=0, column=5, padx=5, pady=5, sticky="w")
+    NET_TIME = tk.Entry(input_frame, width=25)
+    NET_TIME.grid(row=1, column=5, padx=5, pady=5, sticky="w")
+    NET_TIME.config(state="disabled")
 
     # Fülle die Listbox mit den Rufzeichen
     rufzeichen_liste = load_rufzeichen()
 
     # Erstelle Combobox
     selected_rufzeichen = tk.StringVar()
-    combobox = ttk.Combobox(input_frame, textvariable=selected_rufzeichen, values=rufzeichen_liste, state="readonly")
+    combobox = ttk.Combobox(input_frame, \
+        textvariable=selected_rufzeichen, \
+            values=rufzeichen_liste, state="readonly")
     combobox.grid(row=2, column=5, padx=5, pady=5, sticky="w")
 
     def on_open_chat():
@@ -852,15 +941,16 @@ def main():
             messagebox.showwarning(_("Hinweis"), _("Bitte ein Rufzeichen auswählen!"))
 
     # Button zum Öffnen des Chats
-    tk.Button(input_frame, text=_("bisherigen Chat öffnen"), command=on_open_chat).grid(row=2, column=6, padx=5, pady=5, sticky="w")
+    tk.Button(input_frame, text=_("bisherigen Chat öffnen"), \
+        command=on_open_chat).grid(row=2, column=6, padx=5, pady=5, sticky="w")
 
-    tab_control.pack(expand=1, fill="both", padx=10, pady=10)
+    TAB_CONTROL.pack(expand=1, fill="both", padx=10, pady=10)
 
     threading.Thread(target=receive_messages, daemon=True).start()
 
     reopen_tabs()
 
-    root.mainloop()
+    ROOT.mainloop()
 
 
 if __name__ == "__main__":

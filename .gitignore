@@ -1,6 +1,7 @@
 /build
 /dist
 /MeshCom_Client.egg-info
+/MeshCom_Client/.pylintrc
 /MeshCom_Client/settings.ini
 /MeshCom_Client/chatlog.json
 rebuild.sh
