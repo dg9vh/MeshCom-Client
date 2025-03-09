@@ -14,7 +14,6 @@ import sys
 from importlib.metadata import version, PackageNotFoundError
 import collections
 import gettext
-from gettext import gettext as _
 import tomllib  # Falls Python < 3.11, dann: import toml
 import pygame
 
@@ -280,7 +279,7 @@ def load_settings():
         SEND_DELAY = config.getint("Settings", "SendDelay", fallback=40)
         SEND_DELAY = max(SEND_DELAY, 10)
         SEND_DELAY = min(SEND_DELAY, 40)
-        LANGUAGE = config.get("GUI", "Language", fallback="de")
+        LANGUAGE = config.get("GUI", "language", fallback="de")
         WATCHLIST = set(config.get("watchlist", "callsigns", fallback="").split(","))
         open_tabs = sorted(set(config.get("tablist", "tabs", fallback="").split(",")))
 
@@ -832,6 +831,9 @@ def on_closing():
     ROOT.destroy()  # Schließt das Tkinter-Fenster
 
 
+def beenden():
+    ROOT.quit()
+
 def main():
     """ Hier das Hauptprogramm """
     global ROOT, \
@@ -850,10 +852,8 @@ def main():
     ROOT.protocol("WM_DELETE_WINDOW", on_closing)  # Fängt das Schließen ab
 
     load_settings()
-
     appname = 'MeshCom-Client'
     localedir = current_dir / "locales"
-
     # initialisiere Gettext
     en_i18n = gettext.translation(appname, localedir, fallback=True, languages=[LANGUAGE])
     en_i18n.install()
@@ -865,7 +865,8 @@ def main():
     ROOT.config(menu=menu_bar)
 
     file_menu = tk.Menu(menu_bar, tearoff=0)
-    file_menu.add_command(label=_("Beenden"), command=ROOT.quit)
+    file_menu.add_command(label=_("Beenden"), command=beenden, accelerator="Ctrl+Q")
+    ROOT.bind_all("<Control-q>", lambda event: beenden())
     menu_bar.add_cascade(label=_("Datei"), menu=file_menu)
 
     settings_menu = tk.Menu(menu_bar, tearoff=0)
