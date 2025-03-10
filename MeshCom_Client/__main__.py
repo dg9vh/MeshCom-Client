@@ -349,6 +349,10 @@ def display_message(message):
     src_call, dst_call, msg_text, message_id = extract_message_data(message)
 
     msg_tag = ""
+    
+    if msg_text == "":
+        return
+    
     if dst_call == SETTINGS["MYCALL"]:
         dst_call = src_call
         if msg_text[-4] == "{":
