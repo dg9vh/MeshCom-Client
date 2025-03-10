@@ -150,7 +150,7 @@ def save_settings():
     config["Settings"] = {
         "destinationip": SETTINGS["DESTINATION_IP"],
         "mycall": SETTINGS["MYCALL"],
-        "colume": SETTINGS["VOLUME"],
+        "volume": SETTINGS["VOLUME"],
         "senddelay": SETTINGS["SEND_DELAY"],
     }
     config["Audio"] = {
