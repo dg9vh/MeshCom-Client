@@ -1,5 +1,5 @@
-""" MeshCom_Client communicating with MeshCom-Nodes via UDP"""
 #!/usr/bin/python3
+""" MeshCom_Client communicating with MeshCom-Nodes via UDP"""
 import os
 import configparser
 from datetime import datetime
@@ -48,7 +48,6 @@ if __version__ == "unknown":
         __version__ = "unknown"
 
 print(f"MeshCom-Client Version: {__version__}")
-
 
 LAST_SENT_TIME = 0  # Speichert die Zeit der letzten Nachricht
 
@@ -652,8 +651,6 @@ def on_message_click(event, dst_call):
                 # Falls ja, nur das Rufzeichen ersetzen
                 current_text = current_text \
                     .split(":", 1)[1].strip()  # Text hinter dem ersten ":" behalten
-            else:
-                current_text = ""  # Falls kein ":" existiert, neuen Text setzen
 
             # Neues Rufzeichen mit dem aktuellen Text setzen
             MESSAGE_ENTRY.delete(0, tk.END)
