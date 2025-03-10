@@ -51,7 +51,6 @@ print(f"MeshCom-Client Version: {__version__}")
 
 
 LAST_SENT_TIME = 0  # Speichert die Zeit der letzten Nachricht
-SEND_DELAY = 40  # Wartezeit zum Senden neuer Nachrichten in Sekunden
 
 # Wir speichern die letzten 20 IDs in einer deque
 received_ids = collections.deque(maxlen=5)  # maxlen sorgt dafür, dass nur die letzten 5 IDs
@@ -153,7 +152,7 @@ def save_settings():
         "destinationip": SETTINGS["DESTINATION_IP"],
         "mycall": SETTINGS["MYCALL"],
         "colume": SETTINGS["VOLUME"],
-        "senddelay": SEND_DELAY,
+        "senddelay": SETTINGS["SEND_DELAY"],
     }
     config["Audio"] = {
         "new_message": SETTINGS["NEW_MESSAGE"],
@@ -410,7 +409,7 @@ def update_message(call, msg_tag):
 
 def update_timer():
     """ Aktualisiert den Wartetimer """
-    remaining_time = max(0, int(SEND_DELAY - (time.time() - LAST_SENT_TIME)))
+    remaining_time = max(0, int(SETTINGS["SEND_DELAY"] - (time.time() - LAST_SENT_TIME)))
 
     if remaining_time > 0:
         TIMER_LABEL.config(text=f"{remaining_time}s")
@@ -433,7 +432,7 @@ def send_message(event=None):
 
     current_time = time.time()
 
-    if current_time - LAST_SENT_TIME < SEND_DELAY:
+    if current_time - LAST_SENT_TIME < SETTINGS["SEND_DELAY"]:
         return
 
     LAST_SENT_TIME = current_time
