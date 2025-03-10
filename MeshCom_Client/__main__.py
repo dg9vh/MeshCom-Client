@@ -445,7 +445,6 @@ def send_message(event=None):
         "dst": dst_call,
         "msg": msg_text
     }
-    print(message)
     try:
         client_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         encoded_message = json.dumps(message, ensure_ascii=False).encode('utf-8')
